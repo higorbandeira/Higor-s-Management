@@ -236,8 +236,8 @@ export function DashboardPage() {
         avatar.id === dragState.avatarId
           ? {
               ...avatar,
-              x: clamp(nextX, 0, getBoardBounds(avatar.size).maxX),
-              y: clamp(nextY, 0, getBoardBounds(avatar.size).maxY),
+              x: clamp(Math.round(nextX / GRID_SIZE) * GRID_SIZE, 0, getBoardBounds(avatar.size).maxX),
+              y: clamp(Math.round(nextY / GRID_SIZE) * GRID_SIZE, 0, getBoardBounds(avatar.size).maxY),
             }
           : avatar
       )
