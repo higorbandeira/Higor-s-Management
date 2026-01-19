@@ -39,6 +39,7 @@ export function LoginPage() {
         justifyContent: "center",
         background: theme === "light" ? "#f5f5f5" : "#0b0b0b",
         padding: 24,
+        fontFamily: "'Inter', 'Roboto', system-ui, sans-serif",
       }}
     >
       <div
@@ -46,7 +47,7 @@ export function LoginPage() {
           width: "100%",
           maxWidth: 420,
           padding: 32,
-          borderRadius: 28,
+          borderRadius: 32,
           background: theme === "light" ? "#ffffff" : "#111111",
           color: theme === "light" ? "#111111" : "#f5f5f5",
           boxShadow:
@@ -56,8 +57,13 @@ export function LoginPage() {
           border: theme === "light" ? "1px solid #e0e0e0" : "1px solid #2b2b2b",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 600 }}>Entrar</h1>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 28, fontWeight: 600 }}>Entrar</h1>
+            <p style={{ marginTop: 8, marginBottom: 0, color: theme === "light" ? "#424242" : "#bdbdbd" }}>
+              Use seu nickname e senha para continuar.
+            </p>
+          </div>
           <div style={{ display: "flex", gap: 12, fontSize: 12 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
               <input
@@ -80,11 +86,7 @@ export function LoginPage() {
           </div>
         </div>
 
-        <p style={{ marginTop: 8, marginBottom: 24, color: theme === "light" ? "#424242" : "#bdbdbd" }}>
-          Use seu nickname e senha para continuar.
-        </p>
-
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: "block", marginBottom: 8, fontSize: 13, fontWeight: 500 }}>
               Nickname
@@ -102,6 +104,7 @@ export function LoginPage() {
                 color: theme === "light" ? "#111111" : "#f5f5f5",
                 outline: "none",
                 fontSize: 14,
+                transition: "border 0.2s ease, box-shadow 0.2s ease",
               }}
             />
           </div>
@@ -124,6 +127,7 @@ export function LoginPage() {
                 color: theme === "light" ? "#111111" : "#f5f5f5",
                 outline: "none",
                 fontSize: 14,
+                transition: "border 0.2s ease, box-shadow 0.2s ease",
               }}
             />
           </div>
@@ -143,6 +147,8 @@ export function LoginPage() {
               fontWeight: 600,
               cursor: "pointer",
               fontSize: 14,
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              boxShadow: theme === "light" ? "0 8px 16px rgba(0,0,0,0.15)" : "0 8px 16px rgba(0,0,0,0.4)",
             }}
           >
             {loading ? "Entrando..." : "Entrar"}
