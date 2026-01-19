@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { useTheme } from "@/shared/ui/useTheme";
 
 export function LoginPage() {
   const { login, me } = useAuth();
   const navigate = useNavigate();
 
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, setTheme } = useTheme();
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +45,37 @@ export function LoginPage() {
     >
       <div
         style={{
+          position: "fixed",
+          top: 16,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: 12,
+          fontSize: 10,
+          color: theme === "light" ? "#111111" : "#f5f5f5",
+        }}
+      >
+        <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+          <input
+            type="radio"
+            name="theme"
+            checked={theme === "light"}
+            onChange={() => setTheme("light")}
+          />
+          white
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+          <input
+            type="radio"
+            name="theme"
+            checked={theme === "dark"}
+            onChange={() => setTheme("dark")}
+          />
+          black
+        </label>
+      </div>
+      <div
+        style={{
           width: "100%",
           maxWidth: 420,
           padding: 32,
@@ -63,26 +95,6 @@ export function LoginPage() {
             <p style={{ marginTop: 8, marginBottom: 0, color: theme === "light" ? "#424242" : "#bdbdbd" }}>
               Use seu nickname e senha para continuar.
             </p>
-          </div>
-          <div style={{ display: "flex", gap: 12, fontSize: 12 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="theme"
-                checked={theme === "light"}
-                onChange={() => setTheme("light")}
-              />
-              Claro
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="theme"
-                checked={theme === "dark"}
-                onChange={() => setTheme("dark")}
-              />
-              Escuro
-            </label>
           </div>
         </div>
 
@@ -137,6 +149,13 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={loading}
+            title="Enviar credenciais"
+            onMouseEnter={(event) => {
+              event.currentTarget.style.opacity = "1";
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.opacity = "0.9";
+            }}
             style={{
               width: "100%",
               padding: "12px 16px",
@@ -147,7 +166,8 @@ export function LoginPage() {
               fontWeight: 600,
               cursor: "pointer",
               fontSize: 14,
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              opacity: 0.9,
+              transition: "transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease",
               boxShadow: theme === "light" ? "0 8px 16px rgba(0,0,0,0.15)" : "0 8px 16px rgba(0,0,0,0.4)",
             }}
           >

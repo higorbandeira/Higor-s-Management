@@ -7,6 +7,9 @@
 4. **Dashboard em tela cheia com ações flutuantes**: o campo 2D ocupa toda a viewport e as ações ficam em botões flutuantes, reduzindo distrações.
 5. **Popup central de ações**: mapas e avatares agora são gerenciados em um modal com miniaturas e upload integrado.
 6. **Sincronização em tempo real**: o estado do tabuleiro é compartilhado entre usuários via WebSocket.
+7. **Tema persistente**: alternância entre white/black com persistência em todas as telas.
+8. **Modal de avatar**: ajuste de pontos de vida e tamanho diretamente ao clicar no avatar.
+9. **Ajuste de mapa**: controles de escala e posição para enquadrar o fundo.
 
 ## Onde foi aplicado
 - `apps/web/src/features/admin/pages/UsersListPage.tsx`

@@ -14,6 +14,7 @@ connections: set[WebSocket] = set()
 board_state: dict[str, Any] = {
     "selectedMapId": "",
     "placedAvatars": [],
+    "mapViews": {},
 }
 
 
@@ -59,6 +60,7 @@ async def board_ws(websocket: WebSocket) -> None:
             payload = message.get("payload") or {}
             board_state["selectedMapId"] = payload.get("selectedMapId") or ""
             board_state["placedAvatars"] = payload.get("placedAvatars") or []
+            board_state["mapViews"] = payload.get("mapViews") or {}
             await _broadcast({"type": "state", "payload": board_state})
     except WebSocketDisconnect:
         connections.discard(websocket)
