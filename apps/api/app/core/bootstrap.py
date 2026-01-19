@@ -18,11 +18,6 @@ def bootstrap_admin(db: Session) -> None:
     if not settings.BOOTSTRAP_ADMIN_ENABLED:
         return
 
-    # If ADMIN already exists, do nothing (idempotent)
-    exists_admin = db.query(User).filter(User.role == "ADMIN").first()
-    if exists_admin:
-        return
-
     nickname = settings.BOOTSTRAP_ADMIN_NICKNAME
     password = settings.BOOTSTRAP_ADMIN_PASSWORD
 
@@ -44,13 +39,30 @@ def bootstrap_admin(db: Session) -> None:
 
     nickname_norm = normalize_nickname(nickname)
 
-    # avoid conflicts
+    existing_named_admin = (
+        db.query(User)
+        .filter(User.role == "ADMIN", User.nickname_norm == nickname_norm)
+        .first()
+    )
+    if existing_named_admin:
+        if settings.ENV == "dev":
+            existing_named_admin.password_hash = hash_password(password)
+            existing_named_admin.is_active = True
+            db.commit()
+            log.info("Bootstrap admin reset in dev.")
+        return
+
+    exists_admin = db.query(User).filter(User.role == "ADMIN").first()
+    if exists_admin and settings.ENV == "prod":
+        return
+
+    # avoid conflicts with existing non-admin users in prod
     exists_any = db.query(User).filter(User.nickname_norm == nickname_norm).first()
-    if exists_any:
+    if exists_any and settings.ENV == "prod":
         msg = "Bootstrap admin nickname conflicts with existing user nickname_norm."
-        if settings.ENV == "prod":
-            raise BootstrapError(msg)
-        log.warning(msg + " Skipping bootstrap in dev.")
+        raise BootstrapError(msg)
+    if exists_any:
+        log.warning("Bootstrap admin nickname conflicts with existing user nickname_norm.")
         return
 
     admin = User(
