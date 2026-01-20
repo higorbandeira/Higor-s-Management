@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { http } from "@/shared/api/http";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useTheme } from "@/shared/ui/useTheme";
+import { useAiSignature } from "@/shared/ui/useAiSignature";
 
 type User = {
   id: string;
@@ -16,6 +17,7 @@ export function UserEditPage() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  useAiSignature("Admin / Editar Usuário");
 
   const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState("");

@@ -12,6 +12,7 @@
 - **Priorizar entregáveis**: listar o que é obrigatório vs. opcional.
 - **Indicar locais de alteração**: páginas/rotas ou componentes afetados.
 - **Solicitar testes/revisões desejadas**: por exemplo, “rodar lint/testes X”.
+- **Assinatura de IA**: incluir um identificador criativo no console do browser para rastrear telas geradas com apoio de IA.
 
 ## Exemplo de pedido bem definido
 ```text

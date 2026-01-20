@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useTheme } from "@/shared/ui/useTheme";
+import { useAiSignature } from "@/shared/ui/useAiSignature";
 
 export function LoginPage() {
   const { login, me } = useAuth();
   const navigate = useNavigate();
 
   const { theme, setTheme } = useTheme();
+  useAiSignature("Login");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

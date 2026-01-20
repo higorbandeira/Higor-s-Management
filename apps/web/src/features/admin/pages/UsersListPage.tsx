@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { http } from "@/shared/api/http";
 import { useTheme } from "@/shared/ui/useTheme";
+import { useAiSignature } from "@/shared/ui/useAiSignature";
 
 type User = {
   id: string;
@@ -14,6 +15,7 @@ type User = {
 export function UsersListPage() {
   const { logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  useAiSignature("Admin / Lista de Usuários");
   const [users, setUsers] = useState<User[]>([]);
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");

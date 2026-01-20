@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { getAccessToken, http } from "@/shared/api/http";
 import { useTheme } from "@/shared/ui/useTheme";
+import { useAiSignature } from "@/shared/ui/useAiSignature";
 
 type Asset = {
   id: string;
@@ -34,6 +35,7 @@ const GRID_SIZE = 40;
 export function DashboardPage() {
   const { me, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  useAiSignature("Dashboard / Campo");
   const boardRef = useRef<HTMLDivElement | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const suppressNextSync = useRef(false);
