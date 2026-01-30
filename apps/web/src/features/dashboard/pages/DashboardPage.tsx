@@ -51,7 +51,6 @@ export function DashboardPage() {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [activeAvatarId, setActiveAvatarId] = useState<string | null>(null);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const [editingAvatarId, setEditingAvatarId] = useState<string | null>(null);
   const [isMapAdjustOpen, setIsMapAdjustOpen] = useState(false);
   const [mapViews, setMapViews] = useState<Record<string, { scale: number; x: number; y: number }>>({});
   const [isUploadAdjustOpen, setIsUploadAdjustOpen] = useState(false);
@@ -123,10 +122,6 @@ export function DashboardPage() {
   const selectedAvatarAsset = useMemo(
     () => avatars.find((avatar) => avatar.id === selectedAvatarId) ?? null,
     [avatars, selectedAvatarId]
-  );
-  const activeAvatar = useMemo(
-    () => placedAvatars.find((avatar) => avatar.id === editingAvatarId) ?? null,
-    [editingAvatarId, placedAvatars]
   );
   const currentMapView = useMemo(() => {
     if (!selectedMapId) {
@@ -224,6 +219,46 @@ export function DashboardPage() {
     setDragState({ avatarId, offsetX, offsetY });
     setActiveAvatarId(avatarId);
     event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function stopEvent(event: React.MouseEvent | React.PointerEvent) {
+    event.stopPropagation();
+  }
+
+  function adjustAvatarHpCurrent(avatarId: string, delta: number) {
+    setPlacedAvatars((prev) =>
+      prev.map((avatar) => {
+        if (avatar.id !== avatarId) return avatar;
+        const nextHp = clamp(avatar.hpCurrent + delta, 0, avatar.hpTotal);
+        return { ...avatar, hpCurrent: nextHp };
+      })
+    );
+  }
+
+  function adjustAvatarHpTotal(avatarId: string, delta: number) {
+    setPlacedAvatars((prev) =>
+      prev.map((avatar) => {
+        if (avatar.id !== avatarId) return avatar;
+        const nextTotal = Math.max(1, avatar.hpTotal + delta);
+        const nextCurrent = Math.min(avatar.hpCurrent, nextTotal);
+        return { ...avatar, hpTotal: nextTotal, hpCurrent: nextCurrent };
+      })
+    );
+  }
+
+  function adjustAvatarSize(avatarId: string, delta: number) {
+    setPlacedAvatars((prev) =>
+      prev.map((avatar) => {
+        if (avatar.id !== avatarId) return avatar;
+        const nextSize = clamp(avatar.size + delta, 2, 4);
+        return {
+          ...avatar,
+          size: nextSize,
+          x: clamp(avatar.x, 0, getBoardBounds(nextSize).maxX),
+          y: clamp(avatar.y, 0, getBoardBounds(nextSize).maxY),
+        };
+      })
+    );
   }
 
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
@@ -444,44 +479,155 @@ export function DashboardPage() {
             touchAction: "none",
           }}
         >
-          {placedAvatars.map((avatar) => (
-            <button
-              key={avatar.id}
-              type="button"
-              onPointerDown={(event) => handlePointerDown(event, avatar.id)}
-              onClick={() => {
-                setActiveAvatarId(avatar.id);
-                setEditingAvatarId(avatar.id);
-              }}
-              title={`Editar ${avatar.name}`}
-              onMouseEnter={handleButtonEnter}
-              onMouseLeave={handleButtonLeave}
-              style={{
-                position: "absolute",
-                left: avatar.x,
-                top: avatar.y,
-                width: GRID_SIZE * avatar.size,
-                height: GRID_SIZE * avatar.size,
-                padding: 0,
-                borderRadius: 0,
-                border:
-                  avatar.id === activeAvatarId ? "2px solid #4f46e5" : "1px solid rgba(0,0,0,0.15)",
-                background: "rgba(255,255,255,0.9)",
-                cursor: "grab",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: 0.9,
-                transition: "opacity 0.2s ease",
-              }}
-            >
-              <img
-                src={avatar.fileUrl}
-                alt={avatar.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 0 }}
-              />
-            </button>
-          ))}
+          {placedAvatars.map((avatar) => {
+            const isActive = avatar.id === activeAvatarId;
+            return (
+              <div
+                key={avatar.id}
+                style={{
+                  position: "absolute",
+                  left: avatar.x,
+                  top: avatar.y,
+                  width: GRID_SIZE * avatar.size,
+                  height: GRID_SIZE * avatar.size,
+                }}
+              >
+                <button
+                  type="button"
+                  onPointerDown={(event) => handlePointerDown(event, avatar.id)}
+                  onClick={() => {
+                    setActiveAvatarId(avatar.id);
+                  }}
+                  title={`Selecionar ${avatar.name}`}
+                  onMouseEnter={handleButtonEnter}
+                  onMouseLeave={handleButtonLeave}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    padding: 0,
+                    borderRadius: 0,
+                    border: isActive ? "2px solid #4f46e5" : "1px solid rgba(0,0,0,0.15)",
+                    background: "rgba(255,255,255,0.9)",
+                    cursor: "grab",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: 0.9,
+                    transition: "opacity 0.2s ease",
+                  }}
+                >
+                  <img
+                    src={avatar.fileUrl}
+                    alt={avatar.name}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 0 }}
+                  />
+                </button>
+                {isActive && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: -84,
+                      left: 0,
+                      background: isDark ? "rgba(17,17,17,0.9)" : "rgba(255,255,255,0.95)",
+                      borderRadius: 12,
+                      padding: "8px 10px",
+                      boxShadow: "0 12px 30px rgba(0,0,0,0.2)",
+                      display: "grid",
+                      gap: 6,
+                      zIndex: 5,
+                      minWidth: 160,
+                    }}
+                  >
+                    <div style={{ fontSize: 11, fontWeight: 600, color: isDark ? "#f5f5f5" : "#111111" }}>
+                      {avatar.name}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 11, color: isDark ? "#bdbdbd" : "#616161" }}>PV</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpCurrent(avatar.id, -1);
+                        }}
+                        style={buttonStyle}
+                        title="Diminuir PV atual"
+                      >
+                        -
+                      </button>
+                      <span style={{ fontSize: 12, minWidth: 46, textAlign: "center" }}>
+                        {avatar.hpCurrent}/{avatar.hpTotal}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpCurrent(avatar.id, 1);
+                        }}
+                        style={buttonStyle}
+                        title="Aumentar PV atual"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 11, color: isDark ? "#bdbdbd" : "#616161" }}>PV total</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpTotal(avatar.id, -1);
+                        }}
+                        style={buttonStyle}
+                        title="Diminuir PV total"
+                      >
+                        -
+                      </button>
+                      <span style={{ fontSize: 12, minWidth: 32, textAlign: "center" }}>{avatar.hpTotal}</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpTotal(avatar.id, 1);
+                        }}
+                        style={buttonStyle}
+                        title="Aumentar PV total"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 11, color: isDark ? "#bdbdbd" : "#616161" }}>Tamanho</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarSize(avatar.id, -1);
+                        }}
+                        style={buttonStyle}
+                        title="Diminuir tamanho"
+                      >
+                        -
+                      </button>
+                      <span style={{ fontSize: 12, minWidth: 32, textAlign: "center" }}>
+                        {avatar.size * avatar.size}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarSize(avatar.id, 1);
+                        }}
+                        style={buttonStyle}
+                        title="Aumentar tamanho"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
           {placedAvatars.length === 0 && (
             <div
               style={{
@@ -893,149 +1039,6 @@ export function DashboardPage() {
                     setPendingMapAdjust({ ...uploadMapView, y: value });
                   }}
                 />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {editingAvatarId && activeAvatar && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.4)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 24,
-              zIndex: 30,
-            }}
-          >
-            <div
-              style={{
-                background: isDark ? "#111111" : "#ffffff",
-                width: "100%",
-                maxWidth: 460,
-                borderRadius: 20,
-                padding: 24,
-                boxShadow: "0 24px 60px rgba(0,0,0,0.25)",
-                color: isDark ? "#f5f5f5" : "#111111",
-                display: "grid",
-                gap: 16,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <h3 style={{ margin: 0 }}>{activeAvatar.name}</h3>
-                  <div style={{ color: isDark ? "#bdbdbd" : "#616161", fontSize: 12 }}>
-                    Ajuste tamanho e pontos de vida
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditingAvatarId(null)}
-                  style={{
-                    ...buttonStyle,
-                    background: isDark ? "#111111" : "#ffffff",
-                    color: isDark ? "#ffffff" : "#111111",
-                    border: `1px solid ${isDark ? "#ffffff" : "#111111"}`,
-                  }}
-                  title="Fechar"
-                  onMouseEnter={handleButtonEnter}
-                  onMouseLeave={handleButtonLeave}
-                >
-                  Fechar
-                </button>
-              </div>
-
-              <div style={{ display: "grid", gap: 12 }}>
-                <label style={labelStyle}>Pontos de vida total</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={activeAvatar.hpTotal}
-                  onChange={(event) => {
-                    const value = Math.max(Number(event.target.value), 1);
-                    setPlacedAvatars((prev) =>
-                      prev.map((avatar) =>
-                        avatar.id === activeAvatar.id
-                          ? { ...avatar, hpTotal: value, hpCurrent: Math.min(avatar.hpCurrent, value) }
-                          : avatar
-                      )
-                    );
-                  }}
-                  style={inputStyle}
-                />
-
-                <label style={labelStyle}>Pontos de vida atual</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={activeAvatar.hpTotal}
-                  value={activeAvatar.hpCurrent}
-                  onChange={(event) => {
-                    const value = Math.min(Math.max(Number(event.target.value), 0), activeAvatar.hpTotal);
-                    setPlacedAvatars((prev) =>
-                      prev.map((avatar) => (avatar.id === activeAvatar.id ? { ...avatar, hpCurrent: value } : avatar))
-                    );
-                  }}
-                  style={inputStyle}
-                />
-
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={labelStyle}>Tamanho</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const nextSize = Math.max(2, activeAvatar.size - 1);
-                      setPlacedAvatars((prev) =>
-                        prev.map((avatar) =>
-                          avatar.id === activeAvatar.id
-                            ? {
-                                ...avatar,
-                                size: nextSize,
-                                x: clamp(avatar.x, 0, getBoardBounds(nextSize).maxX),
-                                y: clamp(avatar.y, 0, getBoardBounds(nextSize).maxY),
-                              }
-                            : avatar
-                        )
-                      );
-                    }}
-                    style={buttonStyle}
-                    title="Diminuir tamanho"
-                    onMouseEnter={handleButtonEnter}
-                    onMouseLeave={handleButtonLeave}
-                  >
-                    -
-                  </button>
-                  <div style={{ minWidth: 40, textAlign: "center" }}>{activeAvatar.size * activeAvatar.size}</div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const nextSize = Math.min(4, activeAvatar.size + 1);
-                      setPlacedAvatars((prev) =>
-                        prev.map((avatar) =>
-                          avatar.id === activeAvatar.id
-                            ? {
-                                ...avatar,
-                                size: nextSize,
-                                x: clamp(avatar.x, 0, getBoardBounds(nextSize).maxX),
-                                y: clamp(avatar.y, 0, getBoardBounds(nextSize).maxY),
-                              }
-                            : avatar
-                        )
-                      );
-                    }}
-                    style={buttonStyle}
-                    title="Aumentar tamanho"
-                    onMouseEnter={handleButtonEnter}
-                    onMouseLeave={handleButtonLeave}
-                  >
-                    +
-                  </button>
-                </div>
               </div>
             </div>
           </div>
