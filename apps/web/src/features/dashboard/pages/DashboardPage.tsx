@@ -51,6 +51,8 @@ export function DashboardPage() {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [activeAvatarId, setActiveAvatarId] = useState<string | null>(null);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const [actionsView, setActionsView] = useState<"MAP" | "AVATAR">("MAP");
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isMapAdjustOpen, setIsMapAdjustOpen] = useState(false);
   const [mapViews, setMapViews] = useState<Record<string, { scale: number; x: number; y: number }>>({});
   const [isUploadAdjustOpen, setIsUploadAdjustOpen] = useState(false);
@@ -168,6 +170,7 @@ export function DashboardPage() {
         setPendingMapAdjust(null);
       }
       await loadAssets();
+      setIsUploadOpen(false);
     } catch (err: any) {
       setError(err?.response?.data?.detail ?? "Falha no upload");
     } finally {
@@ -219,6 +222,20 @@ export function DashboardPage() {
     setDragState({ avatarId, offsetX, offsetY });
     setActiveAvatarId(avatarId);
     event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function openCollection(view: "MAP" | "AVATAR") {
+    setActionsView(view);
+    setIsActionsOpen(true);
+  }
+
+  function openUpload(view: "MAP" | "AVATAR") {
+    setType(view);
+    setError(null);
+    setName("");
+    setFile(null);
+    setIsActionsOpen(false);
+    setIsUploadOpen(true);
   }
 
   function stopEvent(event: React.MouseEvent | React.PointerEvent) {
@@ -696,14 +713,24 @@ export function DashboardPage() {
           }}
         >
           <button
-            onClick={() => setIsActionsOpen(true)}
-            style={floatingButtonStyle}
-            aria-label="Abrir ações"
-            title="Abrir ações"
+            onClick={() => openCollection("MAP")}
+            style={{ ...floatingButtonStyle, width: 140, height: 48, fontSize: 13 }}
+            aria-label="Adicionar mapa"
+            title="Adicionar mapa"
             onMouseEnter={handleButtonEnter}
             onMouseLeave={handleButtonLeave}
           >
-            +
+            + Mapa
+          </button>
+          <button
+            onClick={() => openCollection("AVATAR")}
+            style={{ ...floatingButtonStyle, width: 140, height: 48, fontSize: 13 }}
+            aria-label="Adicionar avatar"
+            title="Adicionar avatar"
+            onMouseEnter={handleButtonEnter}
+            onMouseLeave={handleButtonLeave}
+          >
+            + Avatar
           </button>
         </div>
 
@@ -737,9 +764,13 @@ export function DashboardPage() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <h2 style={{ margin: 0, color: isDark ? "#ffffff" : "#111111" }}>Ações rápidas</h2>
+                  <h2 style={{ margin: 0, color: isDark ? "#ffffff" : "#111111" }}>
+                    {actionsView === "MAP" ? "Mapas disponíveis" : "Avatares disponíveis"}
+                  </h2>
                   <p style={{ margin: "6px 0 0", color: isDark ? "#bdbdbd" : "#616161" }}>
-                    Selecione mapas e avatares existentes ou faça upload de novos assets.
+                    {actionsView === "MAP"
+                      ? "Selecione um mapa já enviado ou faça upload de um novo."
+                      : "Selecione um avatar já enviado ou faça upload de um novo."}
                   </p>
                 </div>
                 <button
@@ -760,174 +791,260 @@ export function DashboardPage() {
               </div>
 
               <div style={{ display: "grid", gap: 16 }}>
-                <div>
-                  <div style={{ fontWeight: 600, marginBottom: 8, color: isDark ? "#ffffff" : "#111111" }}>Mapas</div>
-                  {maps.length === 0 ? (
-                    <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>Nenhum mapa enviado.</div>
-                  ) : (
-                    <div
-                      style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 12 }}
-                    >
-                      {maps.map((mapAsset) => (
-                        <button
-                          key={mapAsset.id}
-                          type="button"
-                          onClick={() => setSelectedMapId(mapAsset.id)}
-                          title={`Selecionar mapa ${mapAsset.name}`}
-                          onMouseEnter={handleButtonEnter}
-                          onMouseLeave={handleButtonLeave}
-                          style={{
-                            border: mapAsset.id === selectedMapId ? "2px solid #111111" : "1px solid #e0e0e0",
-                            borderRadius: 16,
-                            padding: 8,
-                            background: isDark ? "#151515" : "#fafafa",
-                            cursor: "pointer",
-                            textAlign: "left",
-                            opacity: 0.9,
-                            transition: "opacity 0.2s ease",
-                          }}
-                        >
-                          <img
-                            src={mapAsset.fileUrl}
-                            alt={mapAsset.name}
-                            style={{ width: "100%", height: 72, objectFit: "cover", borderRadius: 12 }}
-                          />
-                          <div style={{ marginTop: 6, fontSize: 13, color: isDark ? "#f5f5f5" : "#111111" }}>
-                            {mapAsset.name}
-                          </div>
-                        </button>
-                      ))}
+                {actionsView === "MAP" ? (
+                  <div>
+                    <div style={{ fontWeight: 600, marginBottom: 8, color: isDark ? "#ffffff" : "#111111" }}>
+                      Mapas
                     </div>
-                  )}
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <button
-                    type="button"
-                    onClick={() => setIsMapAdjustOpen(true)}
-                    disabled={!selectedMapId}
-                    style={{ ...buttonStyle, opacity: selectedMapId ? 0.9 : 0.5 }}
-                    title="Ajustar mapa"
-                    onMouseEnter={handleButtonEnter}
-                    onMouseLeave={handleButtonLeave}
-                  >
-                    Ajustar mapa
-                  </button>
-                </div>
-
-                <div>
-                  <div style={{ fontWeight: 600, marginBottom: 8, color: isDark ? "#ffffff" : "#111111" }}>
-                    Avatares
+                    {maps.length === 0 ? (
+                      <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>Nenhum mapa enviado.</div>
+                    ) : (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                          gap: 12,
+                        }}
+                      >
+                        {maps.map((mapAsset) => (
+                          <button
+                            key={mapAsset.id}
+                            type="button"
+                            onClick={() => setSelectedMapId(mapAsset.id)}
+                            title={`Selecionar mapa ${mapAsset.name}`}
+                            onMouseEnter={handleButtonEnter}
+                            onMouseLeave={handleButtonLeave}
+                            style={{
+                              border: mapAsset.id === selectedMapId ? "2px solid #111111" : "1px solid #e0e0e0",
+                              borderRadius: 16,
+                              padding: 8,
+                              background: isDark ? "#151515" : "#fafafa",
+                              cursor: "pointer",
+                              textAlign: "left",
+                              opacity: 0.9,
+                              transition: "opacity 0.2s ease",
+                            }}
+                          >
+                            <img
+                              src={mapAsset.fileUrl}
+                              alt={mapAsset.name}
+                              style={{ width: "100%", height: 72, objectFit: "cover", borderRadius: 12 }}
+                            />
+                            <div style={{ marginTop: 6, fontSize: 13, color: isDark ? "#f5f5f5" : "#111111" }}>
+                              {mapAsset.name}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  {avatars.length === 0 ? (
-                    <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>Nenhum avatar enviado.</div>
-                  ) : (
-                    <div
-                      style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 12 }}
-                    >
-                      {avatars.map((avatar) => (
-                        <button
-                          key={avatar.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedAvatarId(avatar.id);
-                            handleAddAvatarFrom(avatar);
-                          }}
-                          title={`Adicionar avatar ${avatar.name}`}
-                          onMouseEnter={handleButtonEnter}
-                          onMouseLeave={handleButtonLeave}
-                          style={{
-                            border: "1px solid #e0e0e0",
-                            borderRadius: 16,
-                            padding: 8,
-                            background: isDark ? "#151515" : "#fafafa",
-                            cursor: "pointer",
-                            textAlign: "center",
-                            opacity: 0.9,
-                            transition: "opacity 0.2s ease",
-                          }}
-                        >
-                          <img
-                            src={avatar.fileUrl}
-                            alt={avatar.name}
-                            style={{ width: "100%", height: 72, objectFit: "cover", borderRadius: 12 }}
-                          />
-                          <div style={{ marginTop: 6, fontSize: 12, color: isDark ? "#f5f5f5" : "#111111" }}>
-                            {avatar.name}
-                          </div>
-                        </button>
-                      ))}
+                ) : (
+                  <div>
+                    <div style={{ fontWeight: 600, marginBottom: 8, color: isDark ? "#ffffff" : "#111111" }}>
+                      Avatares
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ borderTop: "1px solid #eee", paddingTop: 16 }}>
-                <h3 style={{ marginTop: 0, color: isDark ? "#ffffff" : "#111111" }}>Enviar novo asset</h3>
-                <form onSubmit={handleUpload}>
-                  <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, alignItems: "center" }}>
-                    <label style={labelStyle}>Tipo</label>
-                    <select value={type} onChange={(e) => setType(e.target.value as any)} style={inputStyle}>
-                      <option value="MAP">Mapa</option>
-                      <option value="AVATAR">Avatar</option>
-                    </select>
-
-                    <label style={labelStyle}>Nome</label>
-                    <input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Ex: Floresta 01"
-                      style={inputStyle}
-                    />
-
-                    <label style={labelStyle}>Arquivo (png/jpg/webp)</label>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                      style={inputStyle}
-                    />
+                    {avatars.length === 0 ? (
+                      <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>Nenhum avatar enviado.</div>
+                    ) : (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                          gap: 12,
+                        }}
+                      >
+                        {avatars.map((avatar) => (
+                          <button
+                            key={avatar.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedAvatarId(avatar.id);
+                              handleAddAvatarFrom(avatar);
+                            }}
+                            title={`Adicionar avatar ${avatar.name}`}
+                            onMouseEnter={handleButtonEnter}
+                            onMouseLeave={handleButtonLeave}
+                            style={{
+                              border: "1px solid #e0e0e0",
+                              borderRadius: 16,
+                              padding: 8,
+                              background: isDark ? "#151515" : "#fafafa",
+                              cursor: "pointer",
+                              textAlign: "center",
+                              opacity: 0.9,
+                              transition: "opacity 0.2s ease",
+                            }}
+                          >
+                            <img
+                              src={avatar.fileUrl}
+                              alt={avatar.name}
+                              style={{ width: "100%", height: 72, objectFit: "cover", borderRadius: 12 }}
+                            />
+                            <div style={{ marginTop: 6, fontSize: 12, color: isDark ? "#f5f5f5" : "#111111" }}>
+                              {avatar.name}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                )}
 
-                  {previewUrl && (
-                    <div style={{ marginTop: 12 }}>
-                      <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>Prévia:</div>
-                      <img src={previewUrl} style={{ maxWidth: 320, borderRadius: 8, border: "1px solid #ddd" }} />
-                    </div>
-                  )}
-
-                  {previewUrl && type === "MAP" && (
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                  {actionsView === "MAP" ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => openUpload("MAP")}
+                        style={buttonStyle}
+                        title="Enviar mapa"
+                        onMouseEnter={handleButtonEnter}
+                        onMouseLeave={handleButtonLeave}
+                      >
+                        Enviar mapa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsMapAdjustOpen(true)}
+                        disabled={!selectedMapId}
+                        style={{ ...buttonStyle, opacity: selectedMapId ? 0.9 : 0.5 }}
+                        title="Ajustar mapa"
+                        onMouseEnter={handleButtonEnter}
+                        onMouseLeave={handleButtonLeave}
+                      >
+                        Ajustar mapa
+                      </button>
+                    </>
+                  ) : (
                     <button
                       type="button"
-                      onClick={() => {
-                        if (!pendingMapAdjust) {
-                          setPendingMapAdjust({ scale: 100, x: 50, y: 50 });
-                        }
-                        setIsUploadAdjustOpen(true);
-                      }}
-                      style={{ ...buttonStyle, marginTop: 12 }}
-                      title="Ajustar imagem antes do upload"
+                      onClick={() => openUpload("AVATAR")}
+                      style={buttonStyle}
+                      title="Enviar avatar"
                       onMouseEnter={handleButtonEnter}
                       onMouseLeave={handleButtonLeave}
                     >
-                      Ajustar imagem
+                      Enviar avatar
                     </button>
                   )}
+                </div>
+              </div>
 
-                  {error && <div style={{ marginTop: 12, color: isDark ? "#ff6b6b" : "#b00020" }}>{error}</div>}
+            </div>
+          </div>
+        )}
 
+        {isUploadOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.4)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 24,
+              zIndex: 25,
+            }}
+          >
+            <div
+              style={{
+                background: isDark ? "#111111" : "#ffffff",
+                width: "100%",
+                maxWidth: 640,
+                borderRadius: 24,
+                padding: 24,
+                boxShadow: "0 24px 60px rgba(0,0,0,0.25)",
+                display: "grid",
+                gap: 16,
+                color: isDark ? "#f5f5f5" : "#111111",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h3 style={{ margin: 0 }}>{type === "MAP" ? "Enviar novo mapa" : "Enviar novo avatar"}</h3>
+                  <div style={{ color: isDark ? "#bdbdbd" : "#616161", fontSize: 12 }}>
+                    {type === "MAP"
+                      ? "Adicione um mapa para usar no tabuleiro."
+                      : "Adicione um avatar para usar no tabuleiro."}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsUploadOpen(false)}
+                  style={{
+                    ...buttonStyle,
+                    background: isDark ? "#111111" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#111111",
+                    border: `1px solid ${isDark ? "#ffffff" : "#111111"}`,
+                  }}
+                  title="Fechar"
+                  onMouseEnter={handleButtonEnter}
+                  onMouseLeave={handleButtonLeave}
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <form onSubmit={handleUpload}>
+                <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, alignItems: "center" }}>
+                  <label style={labelStyle}>Nome</label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={type === "MAP" ? "Ex: Floresta 01" : "Ex: Guerreiro"}
+                    style={inputStyle}
+                  />
+
+                  <label style={labelStyle}>Arquivo (png/jpg/webp)</label>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    style={inputStyle}
+                  />
+                </div>
+
+                {previewUrl && (
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>Prévia:</div>
+                    <img src={previewUrl} style={{ maxWidth: 320, borderRadius: 8, border: "1px solid #ddd" }} />
+                  </div>
+                )}
+
+                {previewUrl && type === "MAP" && (
                   <button
-                    type="submit"
-                    disabled={busy}
-                    style={{ ...buttonStyle, marginTop: 12, opacity: busy ? 0.7 : buttonStyle.opacity }}
-                    title="Upload de asset"
+                    type="button"
+                    onClick={() => {
+                      if (!pendingMapAdjust) {
+                        setPendingMapAdjust({ scale: 100, x: 50, y: 50 });
+                      }
+                      setIsUploadAdjustOpen(true);
+                    }}
+                    style={{ ...buttonStyle, marginTop: 12 }}
+                    title="Ajustar imagem antes do upload"
                     onMouseEnter={handleButtonEnter}
                     onMouseLeave={handleButtonLeave}
                   >
-                    {busy ? "Enviando..." : "Upload"}
+                    Ajustar imagem
                   </button>
-                </form>
-              </div>
+                )}
+
+                {error && <div style={{ marginTop: 12, color: isDark ? "#ff6b6b" : "#b00020" }}>{error}</div>}
+
+                <button
+                  type="submit"
+                  disabled={busy}
+                  style={{ ...buttonStyle, marginTop: 12, opacity: busy ? 0.7 : buttonStyle.opacity }}
+                  title={type === "MAP" ? "Enviar mapa" : "Enviar avatar"}
+                  onMouseEnter={handleButtonEnter}
+                  onMouseLeave={handleButtonLeave}
+                >
+                  {busy ? "Enviando..." : type === "MAP" ? "Enviar mapa" : "Enviar avatar"}
+                </button>
+              </form>
             </div>
           </div>
         )}
