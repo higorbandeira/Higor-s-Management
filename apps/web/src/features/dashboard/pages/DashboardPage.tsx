@@ -457,6 +457,11 @@ export function DashboardPage() {
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
           onKeyDown={handleBoardKeyDown}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setActiveAvatarId(null);
+            }
+          }}
           style={{
             width: "100%",
             height: "100%",
@@ -481,6 +486,7 @@ export function DashboardPage() {
         >
           {placedAvatars.map((avatar) => {
             const isActive = avatar.id === activeAvatarId;
+            const showBelow = avatar.y < GRID_SIZE * 2.5;
             return (
               <div
                 key={avatar.id}
@@ -526,8 +532,9 @@ export function DashboardPage() {
                   <div
                     style={{
                       position: "absolute",
-                      top: -84,
-                      left: 0,
+                      top: showBelow ? "calc(100% + 8px)" : -8,
+                      left: "50%",
+                      transform: showBelow ? "translateX(-50%)" : "translate(-50%, -100%)",
                       background: isDark ? "rgba(17,17,17,0.9)" : "rgba(255,255,255,0.95)",
                       borderRadius: 12,
                       padding: "8px 10px",
@@ -536,6 +543,8 @@ export function DashboardPage() {
                       gap: 6,
                       zIndex: 5,
                       minWidth: 160,
+                      maxWidth: "90vw",
+                      maxHeight: "90vh",
                     }}
                   >
                     <div style={{ fontSize: 11, fontWeight: 600, color: isDark ? "#f5f5f5" : "#111111" }}>
