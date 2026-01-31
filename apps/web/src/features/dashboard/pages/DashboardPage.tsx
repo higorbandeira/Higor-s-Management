@@ -385,6 +385,19 @@ export function DashboardPage() {
     fontSize: 14,
   };
   const labelStyle = { fontSize: 13, fontWeight: 600, color: isDark ? "#d0d0d0" : "#424242" };
+  const formRowStyle = {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: 12,
+    alignItems: "flex-start",
+  };
+  const fieldStyle = {
+    flex: "1 1 220px",
+    minWidth: 180,
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: 8,
+  };
   const buttonStyle = {
     padding: "10px 18px",
     borderRadius: 999,
@@ -960,22 +973,26 @@ export function DashboardPage() {
               </div>
 
               <form onSubmit={handleUpload}>
-                <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, alignItems: "center" }}>
-                  <label style={labelStyle}>Nome</label>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={type === "MAP" ? "Ex: Floresta 01" : "Ex: Guerreiro"}
-                    style={inputStyle}
-                  />
+                <div style={formRowStyle}>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>Nome</label>
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={type === "MAP" ? "Ex: Floresta 01" : "Ex: Guerreiro"}
+                      style={inputStyle}
+                    />
+                  </div>
 
-                  <label style={labelStyle}>Arquivo (png/jpg/webp)</label>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    style={inputStyle}
-                  />
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>Arquivo (png/jpg/webp)</label>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      style={inputStyle}
+                    />
+                  </div>
                 </div>
 
                 {previewUrl && (
