@@ -4,6 +4,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
+import { ChatPage } from "@/features/chat/pages/ChatPage";
 import { UsersListPage } from "@/features/admin/pages/UsersListPage";
 import { UserEditPage } from "@/features/admin/pages/UserEditPage";
 
@@ -14,7 +15,7 @@ function RootRedirect() {
   return me.role === "ADMIN" ? (
     <Navigate to="/admin/users" replace />
   ) : (
-    <Navigate to="/dashboard" replace />
+    <Navigate to={me.module === "DASHBOARD" ? "/dashboard" : "/chat"} replace />
   );
 }
 
@@ -29,6 +30,14 @@ export function AppRouter() {
         element={
           <ProtectedRoute allow={["USER"]}>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute allow={["USER"]}>
+            <ChatPage />
           </ProtectedRoute>
         }
       />

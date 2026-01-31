@@ -10,6 +10,7 @@ class LoginUserOut(BaseModel):
     id: str
     nickname: str
     role: str
+    module: str
 
 
 class LoginOut(BaseModel):
@@ -25,3 +26,4 @@ class MeOut(BaseModel):
     id: str
     nickname: str
     role: str
+    module: str

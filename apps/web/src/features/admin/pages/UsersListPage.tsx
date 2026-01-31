@@ -9,6 +9,7 @@ type User = {
   id: string;
   nickname: string;
   role: "USER" | "ADMIN";
+  module: "CHAT" | "DASHBOARD";
   isActive: boolean;
 };
 
@@ -19,6 +20,7 @@ export function UsersListPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
+  const [module, setModule] = useState<"CHAT" | "DASHBOARD">("CHAT");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,9 +43,10 @@ export function UsersListPage() {
 
     setBusy(true);
     try {
-      await http.post("/admin/users", { nickname, password });
+      await http.post("/admin/users", { nickname, password, module });
       setNickname("");
       setPassword("");
+      setModule("CHAT");
       await load();
     } catch (err: any) {
       setError(err?.response?.data?.detail ?? "Falha ao criar usuário");
@@ -175,6 +178,12 @@ export function UsersListPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 style={inputStyle}
               />
+
+              <label style={labelStyle}>Módulo</label>
+              <select value={module} onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD")} style={inputStyle}>
+                <option value="CHAT">Chat geral</option>
+                <option value="DASHBOARD">Campo RPG</option>
+              </select>
             </div>
 
             {error && <div style={{ marginTop: 12, color: isDark ? "#ff6b6b" : "#b00020" }}>{error}</div>}
@@ -208,7 +217,7 @@ export function UsersListPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 120px 140px",
+                gridTemplateColumns: "1fr 140px 120px 140px",
                 padding: 12,
                 fontWeight: 600,
                 background: isDark ? "#151515" : "#fafafa",
@@ -217,6 +226,7 @@ export function UsersListPage() {
               }}
             >
               <div>Nickname</div>
+              <div>Módulo</div>
               <div>Status</div>
               <div></div>
             </div>
@@ -225,7 +235,7 @@ export function UsersListPage() {
                 key={u.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 120px 140px",
+                  gridTemplateColumns: "1fr 140px 120px 140px",
                   padding: 12,
                   borderBottom: isDark ? "1px solid #2b2b2b" : "1px solid #f2f2f2",
                   alignItems: "center",
@@ -233,6 +243,7 @@ export function UsersListPage() {
                 }}
               >
                 <div>{u.nickname}</div>
+                <div>{u.module === "DASHBOARD" ? "Campo RPG" : "Chat geral"}</div>
                 <div
                   style={{
                     color: u.isActive ? "#0a7d2c" : isDark ? "#ff6b6b" : "#b00020",

@@ -242,16 +242,6 @@ export function DashboardPage() {
     event.stopPropagation();
   }
 
-  function adjustAvatarHpCurrent(avatarId: string, delta: number) {
-    setPlacedAvatars((prev) =>
-      prev.map((avatar) => {
-        if (avatar.id !== avatarId) return avatar;
-        const nextHp = clamp(avatar.hpCurrent + delta, 0, avatar.hpTotal);
-        return { ...avatar, hpCurrent: nextHp };
-      })
-    );
-  }
-
   function adjustAvatarHpTotal(avatarId: string, delta: number) {
     setPlacedAvatars((prev) =>
       prev.map((avatar) => {
@@ -568,46 +558,7 @@ export function DashboardPage() {
                       {avatar.name}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 11, color: isDark ? "#bdbdbd" : "#616161" }}>PV</span>
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          stopEvent(event);
-                          adjustAvatarHpCurrent(avatar.id, -1);
-                        }}
-                        style={buttonStyle}
-                        title="Diminuir PV atual"
-                      >
-                        -
-                      </button>
-                      <span style={{ fontSize: 12, minWidth: 46, textAlign: "center" }}>
-                        {avatar.hpCurrent}/{avatar.hpTotal}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          stopEvent(event);
-                          adjustAvatarHpCurrent(avatar.id, 1);
-                        }}
-                        style={buttonStyle}
-                        title="Aumentar PV atual"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <span style={{ fontSize: 11, color: isDark ? "#bdbdbd" : "#616161" }}>PV total</span>
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          stopEvent(event);
-                          adjustAvatarHpTotal(avatar.id, -1);
-                        }}
-                        style={buttonStyle}
-                        title="Diminuir PV total"
-                      >
-                        -
-                      </button>
                       <span style={{ fontSize: 12, minWidth: 32, textAlign: "center" }}>{avatar.hpTotal}</span>
                       <button
                         type="button"
@@ -619,6 +570,17 @@ export function DashboardPage() {
                         title="Aumentar PV total"
                       >
                         +
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpTotal(avatar.id, 5);
+                        }}
+                        style={buttonStyle}
+                        title="Aumentar PV total em +5"
+                      >
+                        +5
                       </button>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>

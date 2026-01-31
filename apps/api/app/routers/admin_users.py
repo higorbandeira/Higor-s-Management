@@ -10,6 +10,7 @@ from app.db.models.user import User
 from app.schemas.user import UsersListOut, UserOut, UserCreateIn, UserPatchIn
 
 router = APIRouter(prefix="/admin/users", tags=["admin-users"])
+MODULE_OPTIONS = {"CHAT", "DASHBOARD"}
 
 
 @router.get("", response_model=UsersListOut)
@@ -54,6 +55,7 @@ def create_user(
         nickname_norm=nickname_norm,
         password_hash=hash_password(data.password),
         role="USER",  # ADMIN só cria USER
+        module=data.module if data.module in MODULE_OPTIONS else "CHAT",
         is_active=True,
     )
     db.add(user)
@@ -95,6 +97,11 @@ def patch_user(
 
     if data.isActive is not None:
         user.is_active = data.isActive
+
+    if data.module is not None:
+        if data.module not in MODULE_OPTIONS:
+            raise HTTPException(status_code=422, detail="Invalid module")
+        user.module = data.module
 
     db.commit()
     db.refresh(user)

@@ -66,7 +66,12 @@ def login(data: LoginIn, response: Response, db: Session = Depends(get_db)):
 
     return LoginOut(
         accessToken=access,
-        user=LoginUserOut(id=user.id, nickname=user.nickname, role=user.role),
+        user=LoginUserOut(
+            id=user.id,
+            nickname=user.nickname,
+            role=user.role,
+            module=user.module or "CHAT",
+        ),
     )
 
 
@@ -100,7 +105,12 @@ def refresh(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=MeOut)
 def me(user: User = Depends(get_current_user)):
-    return MeOut(id=user.id, nickname=user.nickname, role=user.role)
+    return MeOut(
+        id=user.id,
+        nickname=user.nickname,
+        role=user.role,
+        module=user.module or "CHAT",
+    )
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
