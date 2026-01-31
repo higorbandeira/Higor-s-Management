@@ -17,7 +17,7 @@ export function ProtectedRoute({
     return me.role === "ADMIN" ? (
       <Navigate to="/admin/users" replace />
     ) : (
-      <Navigate to="/dashboard" replace />
+      <Navigate to={me.module === "DASHBOARD" ? "/dashboard" : "/chat"} replace />
     );
   }
 

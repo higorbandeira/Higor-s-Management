@@ -70,6 +70,7 @@ def bootstrap_admin(db: Session) -> None:
         nickname_norm=nickname_norm,
         password_hash=hash_password(password),
         role="ADMIN",
+        module="CHAT",
         is_active=True,
     )
     db.add(admin)

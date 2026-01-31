@@ -13,6 +13,7 @@ class User(Base):
 
     password_hash = Column(String, nullable=False)
     role = Column(String, nullable=False)  # USER|ADMIN
+    module = Column(String, nullable=False, default="CHAT")
     is_active = Column(Boolean, nullable=False, default=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

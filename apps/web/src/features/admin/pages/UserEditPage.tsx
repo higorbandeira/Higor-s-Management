@@ -9,6 +9,7 @@ type User = {
   id: string;
   nickname: string;
   role: "USER" | "ADMIN";
+  module: "CHAT" | "DASHBOARD";
   isActive: boolean;
 };
 
@@ -22,6 +23,7 @@ export function UserEditPage() {
   const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [module, setModule] = useState<"CHAT" | "DASHBOARD">("CHAT");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +35,7 @@ export function UserEditPage() {
       setUser(u);
       setNickname(u.nickname);
       setIsActive(u.isActive);
+      setModule(u.module ?? "CHAT");
     }
     load().catch(() => setError("Usuário não encontrado"));
   }, [id]);
@@ -44,6 +47,7 @@ export function UserEditPage() {
     try {
       await http.patch(`/admin/users/${id}`, {
         nickname,
+        module,
         isActive,
         password: password ? password : undefined,
       });
@@ -193,6 +197,12 @@ export function UserEditPage() {
               <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
               {isActive ? "Ativo" : "Inativo"}
             </label>
+
+            <label style={labelStyle}>Módulo</label>
+            <select value={module} onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD")} style={inputStyle}>
+              <option value="CHAT">Chat geral</option>
+              <option value="DASHBOARD">Campo RPG</option>
+            </select>
 
             <label style={labelStyle}>Nova senha (reset)</label>
             <input

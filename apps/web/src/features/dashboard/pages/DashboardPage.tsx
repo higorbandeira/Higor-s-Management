@@ -51,7 +51,8 @@ export function DashboardPage() {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [activeAvatarId, setActiveAvatarId] = useState<string | null>(null);
   const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const [editingAvatarId, setEditingAvatarId] = useState<string | null>(null);
+  const [actionsView, setActionsView] = useState<"MAP" | "AVATAR">("MAP");
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isMapAdjustOpen, setIsMapAdjustOpen] = useState(false);
   const [mapViews, setMapViews] = useState<Record<string, { scale: number; x: number; y: number }>>({});
   const [isUploadAdjustOpen, setIsUploadAdjustOpen] = useState(false);
@@ -124,10 +125,6 @@ export function DashboardPage() {
     () => avatars.find((avatar) => avatar.id === selectedAvatarId) ?? null,
     [avatars, selectedAvatarId]
   );
-  const activeAvatar = useMemo(
-    () => placedAvatars.find((avatar) => avatar.id === editingAvatarId) ?? null,
-    [editingAvatarId, placedAvatars]
-  );
   const currentMapView = useMemo(() => {
     if (!selectedMapId) {
       return { scale: 100, x: 50, y: 50 };
@@ -173,6 +170,7 @@ export function DashboardPage() {
         setPendingMapAdjust(null);
       }
       await loadAssets();
+      setIsUploadOpen(false);
     } catch (err: any) {
       setError(err?.response?.data?.detail ?? "Falha no upload");
     } finally {
@@ -224,6 +222,50 @@ export function DashboardPage() {
     setDragState({ avatarId, offsetX, offsetY });
     setActiveAvatarId(avatarId);
     event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function openCollection(view: "MAP" | "AVATAR") {
+    setActionsView(view);
+    setIsActionsOpen(true);
+  }
+
+  function openUpload(view: "MAP" | "AVATAR") {
+    setType(view);
+    setError(null);
+    setName("");
+    setFile(null);
+    setIsActionsOpen(false);
+    setIsUploadOpen(true);
+  }
+
+  function stopEvent(event: React.MouseEvent | React.PointerEvent) {
+    event.stopPropagation();
+  }
+
+  function adjustAvatarHpTotal(avatarId: string, delta: number) {
+    setPlacedAvatars((prev) =>
+      prev.map((avatar) => {
+        if (avatar.id !== avatarId) return avatar;
+        const nextTotal = Math.max(1, avatar.hpTotal + delta);
+        const nextCurrent = Math.min(avatar.hpCurrent, nextTotal);
+        return { ...avatar, hpTotal: nextTotal, hpCurrent: nextCurrent };
+      })
+    );
+  }
+
+  function adjustAvatarSize(avatarId: string, delta: number) {
+    setPlacedAvatars((prev) =>
+      prev.map((avatar) => {
+        if (avatar.id !== avatarId) return avatar;
+        const nextSize = clamp(avatar.size + delta, 2, 4);
+        return {
+          ...avatar,
+          size: nextSize,
+          x: clamp(avatar.x, 0, getBoardBounds(nextSize).maxX),
+          y: clamp(avatar.y, 0, getBoardBounds(nextSize).maxY),
+        };
+      })
+    );
   }
 
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
@@ -422,6 +464,11 @@ export function DashboardPage() {
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
           onKeyDown={handleBoardKeyDown}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setActiveAvatarId(null);
+            }
+          }}
           style={{
             width: "100%",
             height: "100%",
@@ -444,44 +491,131 @@ export function DashboardPage() {
             touchAction: "none",
           }}
         >
-          {placedAvatars.map((avatar) => (
-            <button
-              key={avatar.id}
-              type="button"
-              onPointerDown={(event) => handlePointerDown(event, avatar.id)}
-              onClick={() => {
-                setActiveAvatarId(avatar.id);
-                setEditingAvatarId(avatar.id);
-              }}
-              title={`Editar ${avatar.name}`}
-              onMouseEnter={handleButtonEnter}
-              onMouseLeave={handleButtonLeave}
-              style={{
-                position: "absolute",
-                left: avatar.x,
-                top: avatar.y,
-                width: GRID_SIZE * avatar.size,
-                height: GRID_SIZE * avatar.size,
-                padding: 0,
-                borderRadius: 0,
-                border:
-                  avatar.id === activeAvatarId ? "2px solid #4f46e5" : "1px solid rgba(0,0,0,0.15)",
-                background: "rgba(255,255,255,0.9)",
-                cursor: "grab",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: 0.9,
-                transition: "opacity 0.2s ease",
-              }}
-            >
-              <img
-                src={avatar.fileUrl}
-                alt={avatar.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 0 }}
-              />
-            </button>
-          ))}
+          {placedAvatars.map((avatar) => {
+            const isActive = avatar.id === activeAvatarId;
+            const showBelow = avatar.y < GRID_SIZE * 2.5;
+            return (
+              <div
+                key={avatar.id}
+                style={{
+                  position: "absolute",
+                  left: avatar.x,
+                  top: avatar.y,
+                  width: GRID_SIZE * avatar.size,
+                  height: GRID_SIZE * avatar.size,
+                }}
+              >
+                <button
+                  type="button"
+                  onPointerDown={(event) => handlePointerDown(event, avatar.id)}
+                  onClick={() => {
+                    setActiveAvatarId(avatar.id);
+                  }}
+                  title={`Selecionar ${avatar.name}`}
+                  onMouseEnter={handleButtonEnter}
+                  onMouseLeave={handleButtonLeave}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    padding: 0,
+                    borderRadius: 0,
+                    border: isActive ? "2px solid #4f46e5" : "1px solid rgba(0,0,0,0.15)",
+                    background: "rgba(255,255,255,0.9)",
+                    cursor: "grab",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: 0.9,
+                    transition: "opacity 0.2s ease",
+                  }}
+                >
+                  <img
+                    src={avatar.fileUrl}
+                    alt={avatar.name}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 0 }}
+                  />
+                </button>
+                {isActive && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: showBelow ? "calc(100% + 8px)" : -8,
+                      left: "50%",
+                      transform: showBelow ? "translateX(-50%)" : "translate(-50%, -100%)",
+                      background: isDark ? "rgba(17,17,17,0.9)" : "rgba(255,255,255,0.95)",
+                      borderRadius: 12,
+                      padding: "8px 10px",
+                      boxShadow: "0 12px 30px rgba(0,0,0,0.2)",
+                      display: "grid",
+                      gap: 6,
+                      zIndex: 5,
+                      minWidth: 160,
+                      maxWidth: "90vw",
+                      maxHeight: "90vh",
+                    }}
+                  >
+                    <div style={{ fontSize: 11, fontWeight: 600, color: isDark ? "#f5f5f5" : "#111111" }}>
+                      {avatar.name}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 11, color: isDark ? "#bdbdbd" : "#616161" }}>PV total</span>
+                      <span style={{ fontSize: 12, minWidth: 32, textAlign: "center" }}>{avatar.hpTotal}</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpTotal(avatar.id, 1);
+                        }}
+                        style={buttonStyle}
+                        title="Aumentar PV total"
+                      >
+                        +
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpTotal(avatar.id, 5);
+                        }}
+                        style={buttonStyle}
+                        title="Aumentar PV total em +5"
+                      >
+                        +5
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 11, color: isDark ? "#bdbdbd" : "#616161" }}>Tamanho</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarSize(avatar.id, -1);
+                        }}
+                        style={buttonStyle}
+                        title="Diminuir tamanho"
+                      >
+                        -
+                      </button>
+                      <span style={{ fontSize: 12, minWidth: 32, textAlign: "center" }}>
+                        {avatar.size * avatar.size}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarSize(avatar.id, 1);
+                        }}
+                        style={buttonStyle}
+                        title="Aumentar tamanho"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
           {placedAvatars.length === 0 && (
             <div
               style={{
@@ -541,14 +675,24 @@ export function DashboardPage() {
           }}
         >
           <button
-            onClick={() => setIsActionsOpen(true)}
-            style={floatingButtonStyle}
-            aria-label="Abrir ações"
-            title="Abrir ações"
+            onClick={() => openCollection("MAP")}
+            style={{ ...floatingButtonStyle, width: 140, height: 48, fontSize: 13 }}
+            aria-label="Adicionar mapa"
+            title="Adicionar mapa"
             onMouseEnter={handleButtonEnter}
             onMouseLeave={handleButtonLeave}
           >
-            +
+            + Mapa
+          </button>
+          <button
+            onClick={() => openCollection("AVATAR")}
+            style={{ ...floatingButtonStyle, width: 140, height: 48, fontSize: 13 }}
+            aria-label="Adicionar avatar"
+            title="Adicionar avatar"
+            onMouseEnter={handleButtonEnter}
+            onMouseLeave={handleButtonLeave}
+          >
+            + Avatar
           </button>
         </div>
 
@@ -582,9 +726,13 @@ export function DashboardPage() {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <h2 style={{ margin: 0, color: isDark ? "#ffffff" : "#111111" }}>Ações rápidas</h2>
+                  <h2 style={{ margin: 0, color: isDark ? "#ffffff" : "#111111" }}>
+                    {actionsView === "MAP" ? "Mapas disponíveis" : "Avatares disponíveis"}
+                  </h2>
                   <p style={{ margin: "6px 0 0", color: isDark ? "#bdbdbd" : "#616161" }}>
-                    Selecione mapas e avatares existentes ou faça upload de novos assets.
+                    {actionsView === "MAP"
+                      ? "Selecione um mapa já enviado ou faça upload de um novo."
+                      : "Selecione um avatar já enviado ou faça upload de um novo."}
                   </p>
                 </div>
                 <button
@@ -605,174 +753,260 @@ export function DashboardPage() {
               </div>
 
               <div style={{ display: "grid", gap: 16 }}>
-                <div>
-                  <div style={{ fontWeight: 600, marginBottom: 8, color: isDark ? "#ffffff" : "#111111" }}>Mapas</div>
-                  {maps.length === 0 ? (
-                    <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>Nenhum mapa enviado.</div>
-                  ) : (
-                    <div
-                      style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 12 }}
-                    >
-                      {maps.map((mapAsset) => (
-                        <button
-                          key={mapAsset.id}
-                          type="button"
-                          onClick={() => setSelectedMapId(mapAsset.id)}
-                          title={`Selecionar mapa ${mapAsset.name}`}
-                          onMouseEnter={handleButtonEnter}
-                          onMouseLeave={handleButtonLeave}
-                          style={{
-                            border: mapAsset.id === selectedMapId ? "2px solid #111111" : "1px solid #e0e0e0",
-                            borderRadius: 16,
-                            padding: 8,
-                            background: isDark ? "#151515" : "#fafafa",
-                            cursor: "pointer",
-                            textAlign: "left",
-                            opacity: 0.9,
-                            transition: "opacity 0.2s ease",
-                          }}
-                        >
-                          <img
-                            src={mapAsset.fileUrl}
-                            alt={mapAsset.name}
-                            style={{ width: "100%", height: 72, objectFit: "cover", borderRadius: 12 }}
-                          />
-                          <div style={{ marginTop: 6, fontSize: 13, color: isDark ? "#f5f5f5" : "#111111" }}>
-                            {mapAsset.name}
-                          </div>
-                        </button>
-                      ))}
+                {actionsView === "MAP" ? (
+                  <div>
+                    <div style={{ fontWeight: 600, marginBottom: 8, color: isDark ? "#ffffff" : "#111111" }}>
+                      Mapas
                     </div>
-                  )}
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <button
-                    type="button"
-                    onClick={() => setIsMapAdjustOpen(true)}
-                    disabled={!selectedMapId}
-                    style={{ ...buttonStyle, opacity: selectedMapId ? 0.9 : 0.5 }}
-                    title="Ajustar mapa"
-                    onMouseEnter={handleButtonEnter}
-                    onMouseLeave={handleButtonLeave}
-                  >
-                    Ajustar mapa
-                  </button>
-                </div>
-
-                <div>
-                  <div style={{ fontWeight: 600, marginBottom: 8, color: isDark ? "#ffffff" : "#111111" }}>
-                    Avatares
+                    {maps.length === 0 ? (
+                      <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>Nenhum mapa enviado.</div>
+                    ) : (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                          gap: 12,
+                        }}
+                      >
+                        {maps.map((mapAsset) => (
+                          <button
+                            key={mapAsset.id}
+                            type="button"
+                            onClick={() => setSelectedMapId(mapAsset.id)}
+                            title={`Selecionar mapa ${mapAsset.name}`}
+                            onMouseEnter={handleButtonEnter}
+                            onMouseLeave={handleButtonLeave}
+                            style={{
+                              border: mapAsset.id === selectedMapId ? "2px solid #111111" : "1px solid #e0e0e0",
+                              borderRadius: 16,
+                              padding: 8,
+                              background: isDark ? "#151515" : "#fafafa",
+                              cursor: "pointer",
+                              textAlign: "left",
+                              opacity: 0.9,
+                              transition: "opacity 0.2s ease",
+                            }}
+                          >
+                            <img
+                              src={mapAsset.fileUrl}
+                              alt={mapAsset.name}
+                              style={{ width: "100%", height: 72, objectFit: "cover", borderRadius: 12 }}
+                            />
+                            <div style={{ marginTop: 6, fontSize: 13, color: isDark ? "#f5f5f5" : "#111111" }}>
+                              {mapAsset.name}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  {avatars.length === 0 ? (
-                    <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>Nenhum avatar enviado.</div>
-                  ) : (
-                    <div
-                      style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 12 }}
-                    >
-                      {avatars.map((avatar) => (
-                        <button
-                          key={avatar.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedAvatarId(avatar.id);
-                            handleAddAvatarFrom(avatar);
-                          }}
-                          title={`Adicionar avatar ${avatar.name}`}
-                          onMouseEnter={handleButtonEnter}
-                          onMouseLeave={handleButtonLeave}
-                          style={{
-                            border: "1px solid #e0e0e0",
-                            borderRadius: 16,
-                            padding: 8,
-                            background: isDark ? "#151515" : "#fafafa",
-                            cursor: "pointer",
-                            textAlign: "center",
-                            opacity: 0.9,
-                            transition: "opacity 0.2s ease",
-                          }}
-                        >
-                          <img
-                            src={avatar.fileUrl}
-                            alt={avatar.name}
-                            style={{ width: "100%", height: 72, objectFit: "cover", borderRadius: 12 }}
-                          />
-                          <div style={{ marginTop: 6, fontSize: 12, color: isDark ? "#f5f5f5" : "#111111" }}>
-                            {avatar.name}
-                          </div>
-                        </button>
-                      ))}
+                ) : (
+                  <div>
+                    <div style={{ fontWeight: 600, marginBottom: 8, color: isDark ? "#ffffff" : "#111111" }}>
+                      Avatares
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div style={{ borderTop: "1px solid #eee", paddingTop: 16 }}>
-                <h3 style={{ marginTop: 0, color: isDark ? "#ffffff" : "#111111" }}>Enviar novo asset</h3>
-                <form onSubmit={handleUpload}>
-                  <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, alignItems: "center" }}>
-                    <label style={labelStyle}>Tipo</label>
-                    <select value={type} onChange={(e) => setType(e.target.value as any)} style={inputStyle}>
-                      <option value="MAP">Mapa</option>
-                      <option value="AVATAR">Avatar</option>
-                    </select>
-
-                    <label style={labelStyle}>Nome</label>
-                    <input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Ex: Floresta 01"
-                      style={inputStyle}
-                    />
-
-                    <label style={labelStyle}>Arquivo (png/jpg/webp)</label>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                      style={inputStyle}
-                    />
+                    {avatars.length === 0 ? (
+                      <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>Nenhum avatar enviado.</div>
+                    ) : (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                          gap: 12,
+                        }}
+                      >
+                        {avatars.map((avatar) => (
+                          <button
+                            key={avatar.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedAvatarId(avatar.id);
+                              handleAddAvatarFrom(avatar);
+                            }}
+                            title={`Adicionar avatar ${avatar.name}`}
+                            onMouseEnter={handleButtonEnter}
+                            onMouseLeave={handleButtonLeave}
+                            style={{
+                              border: "1px solid #e0e0e0",
+                              borderRadius: 16,
+                              padding: 8,
+                              background: isDark ? "#151515" : "#fafafa",
+                              cursor: "pointer",
+                              textAlign: "center",
+                              opacity: 0.9,
+                              transition: "opacity 0.2s ease",
+                            }}
+                          >
+                            <img
+                              src={avatar.fileUrl}
+                              alt={avatar.name}
+                              style={{ width: "100%", height: 72, objectFit: "cover", borderRadius: 12 }}
+                            />
+                            <div style={{ marginTop: 6, fontSize: 12, color: isDark ? "#f5f5f5" : "#111111" }}>
+                              {avatar.name}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                )}
 
-                  {previewUrl && (
-                    <div style={{ marginTop: 12 }}>
-                      <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>Prévia:</div>
-                      <img src={previewUrl} style={{ maxWidth: 320, borderRadius: 8, border: "1px solid #ddd" }} />
-                    </div>
-                  )}
-
-                  {previewUrl && type === "MAP" && (
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                  {actionsView === "MAP" ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => openUpload("MAP")}
+                        style={buttonStyle}
+                        title="Enviar mapa"
+                        onMouseEnter={handleButtonEnter}
+                        onMouseLeave={handleButtonLeave}
+                      >
+                        Enviar mapa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsMapAdjustOpen(true)}
+                        disabled={!selectedMapId}
+                        style={{ ...buttonStyle, opacity: selectedMapId ? 0.9 : 0.5 }}
+                        title="Ajustar mapa"
+                        onMouseEnter={handleButtonEnter}
+                        onMouseLeave={handleButtonLeave}
+                      >
+                        Ajustar mapa
+                      </button>
+                    </>
+                  ) : (
                     <button
                       type="button"
-                      onClick={() => {
-                        if (!pendingMapAdjust) {
-                          setPendingMapAdjust({ scale: 100, x: 50, y: 50 });
-                        }
-                        setIsUploadAdjustOpen(true);
-                      }}
-                      style={{ ...buttonStyle, marginTop: 12 }}
-                      title="Ajustar imagem antes do upload"
+                      onClick={() => openUpload("AVATAR")}
+                      style={buttonStyle}
+                      title="Enviar avatar"
                       onMouseEnter={handleButtonEnter}
                       onMouseLeave={handleButtonLeave}
                     >
-                      Ajustar imagem
+                      Enviar avatar
                     </button>
                   )}
+                </div>
+              </div>
 
-                  {error && <div style={{ marginTop: 12, color: isDark ? "#ff6b6b" : "#b00020" }}>{error}</div>}
+            </div>
+          </div>
+        )}
 
+        {isUploadOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.4)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 24,
+              zIndex: 25,
+            }}
+          >
+            <div
+              style={{
+                background: isDark ? "#111111" : "#ffffff",
+                width: "100%",
+                maxWidth: 640,
+                borderRadius: 24,
+                padding: 24,
+                boxShadow: "0 24px 60px rgba(0,0,0,0.25)",
+                display: "grid",
+                gap: 16,
+                color: isDark ? "#f5f5f5" : "#111111",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h3 style={{ margin: 0 }}>{type === "MAP" ? "Enviar novo mapa" : "Enviar novo avatar"}</h3>
+                  <div style={{ color: isDark ? "#bdbdbd" : "#616161", fontSize: 12 }}>
+                    {type === "MAP"
+                      ? "Adicione um mapa para usar no tabuleiro."
+                      : "Adicione um avatar para usar no tabuleiro."}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsUploadOpen(false)}
+                  style={{
+                    ...buttonStyle,
+                    background: isDark ? "#111111" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#111111",
+                    border: `1px solid ${isDark ? "#ffffff" : "#111111"}`,
+                  }}
+                  title="Fechar"
+                  onMouseEnter={handleButtonEnter}
+                  onMouseLeave={handleButtonLeave}
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <form onSubmit={handleUpload}>
+                <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, alignItems: "center" }}>
+                  <label style={labelStyle}>Nome</label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={type === "MAP" ? "Ex: Floresta 01" : "Ex: Guerreiro"}
+                    style={inputStyle}
+                  />
+
+                  <label style={labelStyle}>Arquivo (png/jpg/webp)</label>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    style={inputStyle}
+                  />
+                </div>
+
+                {previewUrl && (
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>Prévia:</div>
+                    <img src={previewUrl} style={{ maxWidth: 320, borderRadius: 8, border: "1px solid #ddd" }} />
+                  </div>
+                )}
+
+                {previewUrl && type === "MAP" && (
                   <button
-                    type="submit"
-                    disabled={busy}
-                    style={{ ...buttonStyle, marginTop: 12, opacity: busy ? 0.7 : buttonStyle.opacity }}
-                    title="Upload de asset"
+                    type="button"
+                    onClick={() => {
+                      if (!pendingMapAdjust) {
+                        setPendingMapAdjust({ scale: 100, x: 50, y: 50 });
+                      }
+                      setIsUploadAdjustOpen(true);
+                    }}
+                    style={{ ...buttonStyle, marginTop: 12 }}
+                    title="Ajustar imagem antes do upload"
                     onMouseEnter={handleButtonEnter}
                     onMouseLeave={handleButtonLeave}
                   >
-                    {busy ? "Enviando..." : "Upload"}
+                    Ajustar imagem
                   </button>
-                </form>
-              </div>
+                )}
+
+                {error && <div style={{ marginTop: 12, color: isDark ? "#ff6b6b" : "#b00020" }}>{error}</div>}
+
+                <button
+                  type="submit"
+                  disabled={busy}
+                  style={{ ...buttonStyle, marginTop: 12, opacity: busy ? 0.7 : buttonStyle.opacity }}
+                  title={type === "MAP" ? "Enviar mapa" : "Enviar avatar"}
+                  onMouseEnter={handleButtonEnter}
+                  onMouseLeave={handleButtonLeave}
+                >
+                  {busy ? "Enviando..." : type === "MAP" ? "Enviar mapa" : "Enviar avatar"}
+                </button>
+              </form>
             </div>
           </div>
         )}
@@ -893,149 +1127,6 @@ export function DashboardPage() {
                     setPendingMapAdjust({ ...uploadMapView, y: value });
                   }}
                 />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {editingAvatarId && activeAvatar && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.4)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 24,
-              zIndex: 30,
-            }}
-          >
-            <div
-              style={{
-                background: isDark ? "#111111" : "#ffffff",
-                width: "100%",
-                maxWidth: 460,
-                borderRadius: 20,
-                padding: 24,
-                boxShadow: "0 24px 60px rgba(0,0,0,0.25)",
-                color: isDark ? "#f5f5f5" : "#111111",
-                display: "grid",
-                gap: 16,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <h3 style={{ margin: 0 }}>{activeAvatar.name}</h3>
-                  <div style={{ color: isDark ? "#bdbdbd" : "#616161", fontSize: 12 }}>
-                    Ajuste tamanho e pontos de vida
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditingAvatarId(null)}
-                  style={{
-                    ...buttonStyle,
-                    background: isDark ? "#111111" : "#ffffff",
-                    color: isDark ? "#ffffff" : "#111111",
-                    border: `1px solid ${isDark ? "#ffffff" : "#111111"}`,
-                  }}
-                  title="Fechar"
-                  onMouseEnter={handleButtonEnter}
-                  onMouseLeave={handleButtonLeave}
-                >
-                  Fechar
-                </button>
-              </div>
-
-              <div style={{ display: "grid", gap: 12 }}>
-                <label style={labelStyle}>Pontos de vida total</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={activeAvatar.hpTotal}
-                  onChange={(event) => {
-                    const value = Math.max(Number(event.target.value), 1);
-                    setPlacedAvatars((prev) =>
-                      prev.map((avatar) =>
-                        avatar.id === activeAvatar.id
-                          ? { ...avatar, hpTotal: value, hpCurrent: Math.min(avatar.hpCurrent, value) }
-                          : avatar
-                      )
-                    );
-                  }}
-                  style={inputStyle}
-                />
-
-                <label style={labelStyle}>Pontos de vida atual</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={activeAvatar.hpTotal}
-                  value={activeAvatar.hpCurrent}
-                  onChange={(event) => {
-                    const value = Math.min(Math.max(Number(event.target.value), 0), activeAvatar.hpTotal);
-                    setPlacedAvatars((prev) =>
-                      prev.map((avatar) => (avatar.id === activeAvatar.id ? { ...avatar, hpCurrent: value } : avatar))
-                    );
-                  }}
-                  style={inputStyle}
-                />
-
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={labelStyle}>Tamanho</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const nextSize = Math.max(2, activeAvatar.size - 1);
-                      setPlacedAvatars((prev) =>
-                        prev.map((avatar) =>
-                          avatar.id === activeAvatar.id
-                            ? {
-                                ...avatar,
-                                size: nextSize,
-                                x: clamp(avatar.x, 0, getBoardBounds(nextSize).maxX),
-                                y: clamp(avatar.y, 0, getBoardBounds(nextSize).maxY),
-                              }
-                            : avatar
-                        )
-                      );
-                    }}
-                    style={buttonStyle}
-                    title="Diminuir tamanho"
-                    onMouseEnter={handleButtonEnter}
-                    onMouseLeave={handleButtonLeave}
-                  >
-                    -
-                  </button>
-                  <div style={{ minWidth: 40, textAlign: "center" }}>{activeAvatar.size * activeAvatar.size}</div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const nextSize = Math.min(4, activeAvatar.size + 1);
-                      setPlacedAvatars((prev) =>
-                        prev.map((avatar) =>
-                          avatar.id === activeAvatar.id
-                            ? {
-                                ...avatar,
-                                size: nextSize,
-                                x: clamp(avatar.x, 0, getBoardBounds(nextSize).maxX),
-                                y: clamp(avatar.y, 0, getBoardBounds(nextSize).maxY),
-                              }
-                            : avatar
-                        )
-                      );
-                    }}
-                    style={buttonStyle}
-                    title="Aumentar tamanho"
-                    onMouseEnter={handleButtonEnter}
-                    onMouseLeave={handleButtonLeave}
-                  >
-                    +
-                  </button>
-                </div>
               </div>
             </div>
           </div>
