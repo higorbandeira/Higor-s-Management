@@ -5,7 +5,7 @@ type Me = {
   id: string;
   nickname: string;
   role: "USER" | "ADMIN";
-  module: "CHAT" | "DASHBOARD";
+  module: "CHAT" | "DASHBOARD" | "PDV";
 };
 
 type AuthCtx = {

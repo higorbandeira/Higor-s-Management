@@ -1,6 +1,12 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 
+function moduleToRoute(module?: "CHAT" | "DASHBOARD" | "PDV") {
+  if (module === "DASHBOARD") return "/dashboard";
+  if (module === "PDV") return "/pdv";
+  return "/chat";
+}
+
 export function ProtectedRoute({
   allow,
   children,
@@ -17,7 +23,7 @@ export function ProtectedRoute({
     return me.role === "ADMIN" ? (
       <Navigate to="/admin/users" replace />
     ) : (
-      <Navigate to={me.module === "DASHBOARD" ? "/dashboard" : "/chat"} replace />
+      <Navigate to={moduleToRoute(me.module)} replace />
     );
   }
 

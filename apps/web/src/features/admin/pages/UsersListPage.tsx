@@ -9,7 +9,7 @@ type User = {
   id: string;
   nickname: string;
   role: "USER" | "ADMIN";
-  module: "CHAT" | "DASHBOARD";
+  module: "CHAT" | "DASHBOARD" | "PDV";
   isActive: boolean;
 };
 
@@ -20,9 +20,14 @@ export function UsersListPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
-  const [module, setModule] = useState<"CHAT" | "DASHBOARD">("CHAT");
+  const [module, setModule] = useState<"CHAT" | "DASHBOARD" | "PDV">("CHAT");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const moduleLabels: Record<User["module"], string> = {
+    CHAT: "Chat geral",
+    DASHBOARD: "Campo RPG",
+    PDV: "PDV",
+  };
 
   async function load() {
     const res = await http.get("/admin/users");
@@ -185,11 +190,12 @@ export function UsersListPage() {
                 <label style={labelStyle}>Módulo</label>
                 <select
                   value={module}
-                  onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD")}
+                  onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD" | "PDV")}
                   style={inputStyle}
                 >
                   <option value="CHAT">Chat geral</option>
                   <option value="DASHBOARD">Campo RPG</option>
+                  <option value="PDV">PDV</option>
                 </select>
               </div>
             </div>
@@ -253,7 +259,7 @@ export function UsersListPage() {
                 }}
               >
                 <div style={{ flex: "1 1 200px", minWidth: 160 }}>{u.nickname}</div>
-                <div style={{ flex: "1 1 140px", minWidth: 120 }}>{u.module === "DASHBOARD" ? "Campo RPG" : "Chat geral"}</div>
+                <div style={{ flex: "1 1 140px", minWidth: 120 }}>{moduleLabels[u.module]}</div>
                 <div
                   style={{
                     flex: "1 1 120px",
