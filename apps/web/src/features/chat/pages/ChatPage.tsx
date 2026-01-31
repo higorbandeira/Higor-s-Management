@@ -86,7 +86,7 @@ export function ChatPage() {
     minHeight: "100vh",
     background: isDark ? "#0b0b0b" : "#f5f5f5",
     fontFamily: "'Inter', 'Roboto', system-ui, sans-serif",
-    padding: "24px",
+    padding: "clamp(16px, 4vw, 32px)",
   };
   const cardStyle = {
     background: isDark ? "#111111" : "#ffffff",
@@ -161,11 +161,13 @@ export function ChatPage() {
         {isDark ? "🌙" : "☀️"}
       </button>
 
-      <div style={{ maxWidth: 960, margin: "60px auto 0", display: "grid", gap: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ maxWidth: 960, margin: "60px auto 0", width: "100%", display: "grid", gap: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <h1 style={{ margin: 0, color: isDark ? "#ffffff" : "#111111" }}>Chat geral</h1>
-            <p style={{ marginTop: 6, color: isDark ? "#bdbdbd" : "#616161" }}>
+            <h1 style={{ margin: 0, color: isDark ? "#ffffff" : "#111111", fontSize: "clamp(24px, 3vw, 32px)" }}>
+              Chat geral
+            </h1>
+            <p style={{ marginTop: 6, color: isDark ? "#bdbdbd" : "#616161", fontSize: "clamp(13px, 2vw, 15px)" }}>
               Todos os usuários ficam juntos aqui para conversas rápidas e rolagens.
             </p>
           </div>
@@ -178,7 +180,7 @@ export function ChatPage() {
           </button>
         </div>
 
-        <div style={{ ...cardStyle, minHeight: 360, height: "calc(100vh - 200px)" }}>
+        <div style={{ ...cardStyle, minHeight: 360, height: "calc(100vh - 220px)" }}>
           <div style={surfacePanelStyle}>
             {groupedMessages.length === 0 ? (
               <div style={{ color: isDark ? "#bdbdbd" : "#616161" }}>
