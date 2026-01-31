@@ -5,8 +5,15 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { ChatPage } from "@/features/chat/pages/ChatPage";
+import { PdvPage } from "@/features/pdv/pages/PdvPage";
 import { UsersListPage } from "@/features/admin/pages/UsersListPage";
 import { UserEditPage } from "@/features/admin/pages/UserEditPage";
+
+function moduleToRoute(module?: "CHAT" | "DASHBOARD" | "PDV") {
+  if (module === "DASHBOARD") return "/dashboard";
+  if (module === "PDV") return "/pdv";
+  return "/chat";
+}
 
 function RootRedirect() {
   const { me, loading } = useAuth();
@@ -15,7 +22,7 @@ function RootRedirect() {
   return me.role === "ADMIN" ? (
     <Navigate to="/admin/users" replace />
   ) : (
-    <Navigate to={me.module === "DASHBOARD" ? "/dashboard" : "/chat"} replace />
+    <Navigate to={moduleToRoute(me.module)} replace />
   );
 }
 
@@ -38,6 +45,14 @@ export function AppRouter() {
         element={
           <ProtectedRoute allow={["USER"]}>
             <ChatPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pdv"
+        element={
+          <ProtectedRoute allow={["USER"]}>
+            <PdvPage />
           </ProtectedRoute>
         }
       />
