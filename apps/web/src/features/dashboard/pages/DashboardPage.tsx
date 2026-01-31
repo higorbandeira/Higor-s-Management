@@ -389,26 +389,27 @@ export function DashboardPage() {
     padding: "10px 18px",
     borderRadius: 999,
     border: "none",
-    background: isDark ? "#ffffff" : "#111111",
-    color: isDark ? "#111111" : "#ffffff",
+    background: isDark ? "#f5f5f5" : "#1f1f1f",
+    color: isDark ? "#1f1f1f" : "#ffffff",
     fontWeight: 600,
     cursor: "pointer",
-    opacity: 0.9,
-    transition: "opacity 0.2s ease",
+    opacity: 0.92,
+    transition: "opacity 0.2s ease, transform 0.2s ease",
+    boxShadow: isDark ? "0 6px 12px rgba(0,0,0,0.35)" : "0 6px 12px rgba(0,0,0,0.12)",
   };
   const floatingButtonStyle = {
     width: 56,
     height: 56,
     borderRadius: 999,
     border: "none",
-    background: isDark ? "#ffffff" : "#111111",
-    color: isDark ? "#111111" : "#ffffff",
+    background: isDark ? "#f5f5f5" : "#1f1f1f",
+    color: isDark ? "#1f1f1f" : "#ffffff",
     fontSize: 24,
     fontWeight: 600,
     cursor: "pointer",
-    opacity: 0.9,
-    transition: "opacity 0.2s ease",
-    boxShadow: "0 16px 30px rgba(0,0,0,0.2)",
+    opacity: 0.92,
+    transition: "opacity 0.2s ease, transform 0.2s ease",
+    boxShadow: isDark ? "0 16px 30px rgba(0,0,0,0.35)" : "0 16px 30px rgba(0,0,0,0.2)",
   };
   const handleButtonEnter = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.currentTarget.style.opacity = "1";
@@ -420,43 +421,29 @@ export function DashboardPage() {
   return (
     <div style={pageStyle}>
       <div style={{ position: "relative", width: "100%", height: "100vh" }}>
-        <div
+        <button
+          type="button"
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          title={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
+          aria-label="Alternar tema"
           style={{
             position: "fixed",
             top: 16,
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: 12,
-            fontSize: 10,
-            color: isDark ? "#f5f5f5" : "#111111",
+            right: 16,
+            width: 46,
+            height: 46,
+            borderRadius: 16,
+            border: "none",
+            background: isDark ? "#1f1f1f" : "#ffffff",
+            color: isDark ? "#90caf9" : "#ff8f00",
+            fontSize: 20,
+            cursor: "pointer",
+            boxShadow: isDark ? "0 10px 22px rgba(0,0,0,0.45)" : "0 10px 22px rgba(0,0,0,0.2)",
             zIndex: 12,
-            background: isDark ? "#111111" : "#ffffff",
-            border: isDark ? "1px solid #2b2b2b" : "1px solid #e0e0e0",
-            borderRadius: 999,
-            padding: "6px 12px",
-            boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
           }}
         >
-          <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-            <input
-              type="radio"
-              name="theme"
-              checked={theme === "light"}
-              onChange={() => setTheme("light")}
-            />
-            white
-          </label>
-          <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-            <input
-              type="radio"
-              name="theme"
-              checked={theme === "dark"}
-              onChange={() => setTheme("dark")}
-            />
-            black
-          </label>
-        </div>
+          {isDark ? "🌙" : "☀️"}
+        </button>
         <div
           ref={boardRef}
           tabIndex={0}
@@ -560,6 +547,28 @@ export function DashboardPage() {
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <span style={{ fontSize: 11, color: isDark ? "#bdbdbd" : "#616161" }}>PV total</span>
                       <span style={{ fontSize: 12, minWidth: 32, textAlign: "center" }}>{avatar.hpTotal}</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpTotal(avatar.id, -1);
+                        }}
+                        style={buttonStyle}
+                        title="Diminuir PV total"
+                      >
+                        -1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          stopEvent(event);
+                          adjustAvatarHpTotal(avatar.id, -5);
+                        }}
+                        style={buttonStyle}
+                        title="Diminuir PV total em -5"
+                      >
+                        -5
+                      </button>
                       <button
                         type="button"
                         onClick={(event) => {

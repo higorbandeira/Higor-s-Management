@@ -105,42 +105,29 @@ export function UsersListPage() {
 
   return (
     <div style={pageStyle}>
-      <div
+      <button
+        type="button"
+        onClick={() => setTheme(isDark ? "light" : "dark")}
+        title={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
+        aria-label="Alternar tema"
         style={{
           position: "fixed",
           top: 16,
-          left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex",
-          gap: 12,
-          fontSize: 10,
-          color: isDark ? "#f5f5f5" : "#111111",
-          background: isDark ? "#111111" : "#ffffff",
-          border: isDark ? "1px solid #2b2b2b" : "1px solid #e0e0e0",
-          borderRadius: 999,
-          padding: "6px 12px",
-          boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
+          right: 16,
+          width: 46,
+          height: 46,
+          borderRadius: 16,
+          border: "none",
+          background: isDark ? "#1f1f1f" : "#ffffff",
+          color: isDark ? "#90caf9" : "#ff8f00",
+          fontSize: 20,
+          cursor: "pointer",
+          boxShadow: isDark ? "0 10px 22px rgba(0,0,0,0.45)" : "0 10px 22px rgba(0,0,0,0.2)",
+          zIndex: 12,
         }}
       >
-        <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-          <input
-            type="radio"
-            name="theme"
-            checked={theme === "light"}
-            onChange={() => setTheme("light")}
-          />
-          white
-        </label>
-        <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-          <input
-            type="radio"
-            name="theme"
-            checked={theme === "dark"}
-            onChange={() => setTheme("dark")}
-          />
-          black
-        </label>
-      </div>
+        {isDark ? "🌙" : "☀️"}
+      </button>
       <div style={containerStyle}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
