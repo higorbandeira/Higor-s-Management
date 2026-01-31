@@ -235,45 +235,73 @@ export function ChatPage() {
             </div>
           )}
 
-          <div style={{ display: "grid", gap: 12 }}>
+          <div style={{ position: "relative" }}>
             <textarea
               value={text}
               onChange={(event) => setText(event.target.value)}
               placeholder="Digite sua mensagem..."
-              rows={3}
-              style={{ ...inputStyle, resize: "vertical" }}
+              rows={4}
+              style={{ ...inputStyle, resize: "vertical", paddingBottom: 58 }}
             />
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+            <div
+              style={{
+                position: "absolute",
+                left: 12,
+                bottom: 12,
+                display: "flex",
+                gap: 8,
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setIsActionsOpen((prev) => !prev)}
                 style={{
                   ...buttonStyle,
-                  background: "transparent",
-                  border: `1px solid ${isDark ? "#ffffff" : "#111111"}`,
-                  color: isDark ? "#ffffff" : "#111111",
+                  padding: "6px 10px",
+                  borderRadius: 12,
+                  background: isDark ? "#1a1a1a" : "#f1f1f1",
+                  color: isDark ? "#f5f5f5" : "#111111",
                   boxShadow: "none",
                 }}
                 title="Abrir interações"
               >
-                Interações
+                ✨
               </button>
               <button
                 type="button"
                 onClick={() => setText("")}
-                style={{ ...buttonStyle, background: "transparent", border: `1px solid ${isDark ? "#ffffff" : "#111111"}`, color: isDark ? "#ffffff" : "#111111", boxShadow: "none" }}
+                style={{
+                  ...buttonStyle,
+                  padding: "6px 10px",
+                  borderRadius: 12,
+                  background: isDark ? "#1a1a1a" : "#f1f1f1",
+                  color: isDark ? "#f5f5f5" : "#111111",
+                  boxShadow: "none",
+                }}
+                title="Limpar mensagem"
               >
-                Limpar
-              </button>
-              <button
-                type="button"
-                onClick={handleSend}
-                style={{ ...buttonStyle, width: 48, height: 48, padding: 0, borderRadius: 16, fontSize: 18 }}
-                title="Enviar mensagem"
-              >
-                ➤
+                ⎚
               </button>
             </div>
+            <button
+              type="button"
+              onClick={handleSend}
+              title="Enviar mensagem"
+              style={{
+                ...buttonStyle,
+                position: "absolute",
+                right: 12,
+                bottom: 12,
+                width: 40,
+                height: 40,
+                padding: 0,
+                borderRadius: 14,
+                fontSize: 18,
+                boxShadow: "none",
+              }}
+            >
+              ➤
+            </button>
           </div>
         </div>
       </div>
