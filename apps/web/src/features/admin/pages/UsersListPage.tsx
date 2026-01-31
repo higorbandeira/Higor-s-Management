@@ -105,61 +105,29 @@ export function UsersListPage() {
 
   return (
     <div style={pageStyle}>
-      <div
+      <button
+        type="button"
+        onClick={() => setTheme(isDark ? "light" : "dark")}
+        title={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
+        aria-label="Alternar tema"
         style={{
           position: "fixed",
           top: 16,
           right: 16,
-          display: "grid",
-          gap: 8,
-          fontSize: 10,
-          color: isDark ? "#f5f5f5" : "#111111",
-          background: isDark ? "#111111" : "#ffffff",
-          border: isDark ? "1px solid #2b2b2b" : "1px solid #e0e0e0",
+          width: 46,
+          height: 46,
           borderRadius: 16,
-          padding: "8px",
-          boxShadow: "0 8px 18px rgba(0,0,0,0.18)",
+          border: "none",
+          background: isDark ? "#1f1f1f" : "#ffffff",
+          color: isDark ? "#90caf9" : "#ff8f00",
+          fontSize: 20,
+          cursor: "pointer",
+          boxShadow: isDark ? "0 10px 22px rgba(0,0,0,0.45)" : "0 10px 22px rgba(0,0,0,0.2)",
+          zIndex: 12,
         }}
       >
-        <button
-          type="button"
-          onClick={() => setTheme("light")}
-          aria-pressed={theme === "light"}
-          title="Tema claro"
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            border: theme === "light" ? "2px solid #ffb300" : isDark ? "1px solid #2b2b2b" : "1px solid #d0d0d0",
-            background: theme === "light" ? "#fff3cd" : isDark ? "#1a1a1a" : "#ffffff",
-            color: "#ff8f00",
-            fontSize: 18,
-            cursor: "pointer",
-            boxShadow: theme === "light" ? "0 6px 12px rgba(255,179,0,0.25)" : "none",
-          }}
-        >
-          ☀️
-        </button>
-        <button
-          type="button"
-          onClick={() => setTheme("dark")}
-          aria-pressed={theme === "dark"}
-          title="Tema escuro"
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            border: theme === "dark" ? "2px solid #90caf9" : isDark ? "1px solid #2b2b2b" : "1px solid #d0d0d0",
-            background: theme === "dark" ? "#1e1e2f" : isDark ? "#1a1a1a" : "#ffffff",
-            color: "#90caf9",
-            fontSize: 18,
-            cursor: "pointer",
-            boxShadow: theme === "dark" ? "0 6px 12px rgba(144,202,249,0.2)" : "none",
-          }}
-        >
-          🌙
-        </button>
-      </div>
+        {isDark ? "🌙" : "☀️"}
+      </button>
       <div style={containerStyle}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
