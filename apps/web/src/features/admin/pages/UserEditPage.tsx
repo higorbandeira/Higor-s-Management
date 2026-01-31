@@ -93,6 +93,19 @@ export function UserEditPage() {
     border: isDark ? "1px solid #2b2b2b" : "1px solid #e4e4e4",
     boxShadow: isDark ? "0 16px 40px rgba(0,0,0,0.4)" : "0 16px 40px rgba(0,0,0,0.08)",
   };
+  const formRowStyle = {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: 16,
+    alignItems: "flex-start",
+  };
+  const fieldStyle = {
+    flex: "1 1 240px",
+    minWidth: 200,
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: 8,
+  };
   const labelStyle = { fontSize: 13, fontWeight: 600, color: isDark ? "#d0d0d0" : "#424242" };
   const inputStyle = {
     width: "100%",
@@ -135,18 +148,18 @@ export function UserEditPage() {
         aria-label="Alternar tema"
         style={{
           position: "fixed",
-          top: 16,
-          right: 16,
-          width: 46,
-          height: 46,
-          borderRadius: 16,
+          right: 24,
+          bottom: 24,
+          width: 52,
+          height: 52,
+          borderRadius: 999,
           border: "none",
           background: isDark ? "#1f1f1f" : "#ffffff",
           color: isDark ? "#90caf9" : "#ff8f00",
           fontSize: 20,
           cursor: "pointer",
-          boxShadow: isDark ? "0 10px 22px rgba(0,0,0,0.45)" : "0 10px 22px rgba(0,0,0,0.2)",
-          zIndex: 12,
+          boxShadow: isDark ? "0 16px 30px rgba(0,0,0,0.45)" : "0 16px 30px rgba(0,0,0,0.2)",
+          zIndex: 20,
         }}
       >
         {isDark ? "🌙" : "☀️"}
@@ -175,30 +188,50 @@ export function UserEditPage() {
         </div>
 
         <div style={cardStyle}>
-          <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 12, alignItems: "center" }}>
-            <label style={labelStyle}>Nickname</label>
-            <input value={nickname} onChange={(e) => setNickname(e.target.value)} style={inputStyle} />
+          <div style={formRowStyle}>
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Nickname</label>
+              <input value={nickname} onChange={(e) => setNickname(e.target.value)} style={inputStyle} />
+            </div>
 
-            <label style={labelStyle}>Status</label>
-            <label style={{ display: "flex", gap: 8, alignItems: "center", fontWeight: 600, color: isDark ? "#f5f5f5" : "#111111" }}>
-              <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-              {isActive ? "Ativo" : "Inativo"}
-            </label>
+            <div style={{ ...fieldStyle, flex: "1 1 160px", minWidth: 160 }}>
+              <label style={labelStyle}>Status</label>
+              <label
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  alignItems: "center",
+                  fontWeight: 600,
+                  color: isDark ? "#f5f5f5" : "#111111",
+                }}
+              >
+                <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+                {isActive ? "Ativo" : "Inativo"}
+              </label>
+            </div>
 
-            <label style={labelStyle}>Módulo</label>
-            <select value={module} onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD")} style={inputStyle}>
-              <option value="CHAT">Chat geral</option>
-              <option value="DASHBOARD">Campo RPG</option>
-            </select>
+            <div style={{ ...fieldStyle, flex: "1 1 180px", minWidth: 160 }}>
+              <label style={labelStyle}>Módulo</label>
+              <select
+                value={module}
+                onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD")}
+                style={inputStyle}
+              >
+                <option value="CHAT">Chat geral</option>
+                <option value="DASHBOARD">Campo RPG</option>
+              </select>
+            </div>
 
-            <label style={labelStyle}>Nova senha (reset)</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Deixe vazio para não alterar"
-              style={inputStyle}
-            />
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Nova senha (reset)</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Deixe vazio para não alterar"
+                style={inputStyle}
+              />
+            </div>
           </div>
 
           {error && <div style={{ marginTop: 12, color: isDark ? "#ff6b6b" : "#b00020" }}>{error}</div>}

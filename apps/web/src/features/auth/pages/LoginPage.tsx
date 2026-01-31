@@ -53,18 +53,18 @@ export function LoginPage() {
         aria-label="Alternar tema"
         style={{
           position: "fixed",
-          top: 16,
-          right: 16,
-          width: 46,
-          height: 46,
-          borderRadius: 16,
+          right: 24,
+          bottom: 24,
+          width: 52,
+          height: 52,
+          borderRadius: 999,
           border: "none",
           background: isDark ? "#1f1f1f" : "#ffffff",
           color: isDark ? "#90caf9" : "#ff8f00",
           fontSize: 20,
           cursor: "pointer",
-          boxShadow: isDark ? "0 10px 22px rgba(0,0,0,0.45)" : "0 10px 22px rgba(0,0,0,0.2)",
-          zIndex: 12,
+          boxShadow: isDark ? "0 16px 30px rgba(0,0,0,0.45)" : "0 16px 30px rgba(0,0,0,0.2)",
+          zIndex: 20,
         }}
       >
         {isDark ? "🌙" : "☀️"}

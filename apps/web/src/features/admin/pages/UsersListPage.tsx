@@ -70,6 +70,19 @@ export function UsersListPage() {
     border: isDark ? "1px solid #2b2b2b" : "1px solid #e4e4e4",
     boxShadow: isDark ? "0 16px 40px rgba(0,0,0,0.4)" : "0 16px 40px rgba(0,0,0,0.08)",
   };
+  const formRowStyle = {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: 16,
+    alignItems: "flex-start",
+  };
+  const fieldStyle = {
+    flex: "1 1 220px",
+    minWidth: 200,
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: 8,
+  };
   const labelStyle = { fontSize: 13, fontWeight: 600, color: isDark ? "#d0d0d0" : "#424242" };
   const inputStyle = {
     width: "100%",
@@ -112,18 +125,18 @@ export function UsersListPage() {
         aria-label="Alternar tema"
         style={{
           position: "fixed",
-          top: 16,
-          right: 16,
-          width: 46,
-          height: 46,
-          borderRadius: 16,
+          right: 24,
+          bottom: 24,
+          width: 52,
+          height: 52,
+          borderRadius: 999,
           border: "none",
           background: isDark ? "#1f1f1f" : "#ffffff",
           color: isDark ? "#90caf9" : "#ff8f00",
           fontSize: 20,
           cursor: "pointer",
-          boxShadow: isDark ? "0 10px 22px rgba(0,0,0,0.45)" : "0 10px 22px rgba(0,0,0,0.2)",
-          zIndex: 12,
+          boxShadow: isDark ? "0 16px 30px rgba(0,0,0,0.45)" : "0 16px 30px rgba(0,0,0,0.2)",
+          zIndex: 20,
         }}
       >
         {isDark ? "🌙" : "☀️"}
@@ -154,23 +167,31 @@ export function UsersListPage() {
         <div style={cardStyle}>
           <h2 style={{ marginTop: 0, color: isDark ? "#ffffff" : "#111111" }}>Criar USER</h2>
           <form onSubmit={createUser}>
-            <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: 12, alignItems: "center" }}>
-              <label style={labelStyle}>Nickname</label>
-              <input value={nickname} onChange={(e) => setNickname(e.target.value)} style={inputStyle} />
-
-              <label style={labelStyle}>Senha</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={inputStyle}
-              />
-
-              <label style={labelStyle}>Módulo</label>
-              <select value={module} onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD")} style={inputStyle}>
-                <option value="CHAT">Chat geral</option>
-                <option value="DASHBOARD">Campo RPG</option>
-              </select>
+            <div style={formRowStyle}>
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Nickname</label>
+                <input value={nickname} onChange={(e) => setNickname(e.target.value)} style={inputStyle} />
+              </div>
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Senha</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+              <div style={{ ...fieldStyle, flex: "1 1 180px", minWidth: 160 }}>
+                <label style={labelStyle}>Módulo</label>
+                <select
+                  value={module}
+                  onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD")}
+                  style={inputStyle}
+                >
+                  <option value="CHAT">Chat geral</option>
+                  <option value="DASHBOARD">Campo RPG</option>
+                </select>
+              </div>
             </div>
 
             {error && <div style={{ marginTop: 12, color: isDark ? "#ff6b6b" : "#b00020" }}>{error}</div>}
@@ -203,8 +224,9 @@ export function UsersListPage() {
           >
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 140px 120px 140px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 12,
                 padding: 12,
                 fontWeight: 600,
                 background: isDark ? "#151515" : "#fafafa",
@@ -212,34 +234,37 @@ export function UsersListPage() {
                 color: isDark ? "#f5f5f5" : "#111111",
               }}
             >
-              <div>Nickname</div>
-              <div>Módulo</div>
-              <div>Status</div>
-              <div></div>
+              <div style={{ flex: "1 1 200px", minWidth: 160 }}>Nickname</div>
+              <div style={{ flex: "1 1 140px", minWidth: 120 }}>Módulo</div>
+              <div style={{ flex: "1 1 120px", minWidth: 100 }}>Status</div>
+              <div style={{ flex: "0 0 120px", textAlign: "right" }}></div>
             </div>
             {users.map((u) => (
               <div
                 key={u.id}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 140px 120px 140px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 12,
                   padding: 12,
                   borderBottom: isDark ? "1px solid #2b2b2b" : "1px solid #f2f2f2",
                   alignItems: "center",
                   color: isDark ? "#f5f5f5" : "#111111",
                 }}
               >
-                <div>{u.nickname}</div>
-                <div>{u.module === "DASHBOARD" ? "Campo RPG" : "Chat geral"}</div>
+                <div style={{ flex: "1 1 200px", minWidth: 160 }}>{u.nickname}</div>
+                <div style={{ flex: "1 1 140px", minWidth: 120 }}>{u.module === "DASHBOARD" ? "Campo RPG" : "Chat geral"}</div>
                 <div
                   style={{
+                    flex: "1 1 120px",
+                    minWidth: 100,
                     color: u.isActive ? "#0a7d2c" : isDark ? "#ff6b6b" : "#b00020",
                     fontWeight: 600,
                   }}
                 >
                   {u.isActive ? "Ativo" : "Inativo"}
                 </div>
-                <div>
+                <div style={{ flex: "0 0 120px", textAlign: "right" }}>
                   {u.role === "USER" ? (
                     <Link
                       to={`/admin/users/${u.id}`}
