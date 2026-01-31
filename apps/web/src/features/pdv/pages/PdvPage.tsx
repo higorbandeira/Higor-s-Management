@@ -29,7 +29,7 @@ export function PdvPage() {
   };
   const containerStyle = {
     maxWidth: 1080,
-    margin: "60px auto 0",
+    margin: "0 auto",
     display: "grid",
     gap: 20,
   };

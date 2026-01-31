@@ -1,22 +1,22 @@
 # Higor - Central de Módulos IA (React + FastAPI)
 
 ## Visão geral
-Este repositório é a central de módulos que compartilham um **login único** e concentram dashboards e sistemas específicos, com evolução contínua apoiada por IA.
+Este repositório concentra múltiplos módulos com **login único**, permissões por papel e redirecionamento automático para o módulo correto. A base evolui continuamente para suportar novos fluxos operacionais.
 
 ## O que já está pronto
 - Login por **nickname + senha** (único para todos os módulos)
 - Roles: **USER** e **ADMIN**
-- Admin: lista/cria USER, edita nickname, ativa/inativa, reseta senha
-- USER: Dashboard MVP (placeholder do tabuleiro) + Upload de assets (MAP/AVATAR) e lista (visível a todos)
+- Redirecionamento automático para o módulo do usuário (CHAT, DASHBOARD ou PDV)
+- Admin: lista/cria USER, edita nickname, ativa/inativa, reseta senha e define módulo
+- Chat geral em tempo real (WebSocket)
+- Dashboard de campo RPG com upload de assets (MAP/AVATAR)
+- Módulo PDV com rotinas de frente de caixa e atalhos operacionais
 - Refresh token em cookie HttpOnly, armazenado como hash no Postgres
 - `nickname_norm` para unicidade (trim + collapse espaços + lowercase)
 - Docker Compose local e template de deploy via Terraform (AWS EC2 exemplo)
 
-## Atenção (pendências funcionais)
-- O login ainda **não direciona** o usuário para o dashboard correto do módulo com base nas permissões.
-
 ## Módulos
-- **apps/web**: Dashboard principal (atualmente, o módulo de campo grid para administrar partidas de RPG).
+- **apps/web**: Interface principal com Chat, Dashboard e PDV.
 - **apps/api**: API e autenticação compartilhada.
 
 ## Documentação por módulo
@@ -37,7 +37,9 @@ Bootstrap do ADMIN (dev) vem no `docker-compose.yml`:
 
 ## Rotas
 - `/login`
+- `/chat` (USER)
 - `/dashboard` (USER)
+- `/pdv` (USER)
 - `/admin/users` (ADMIN)
 - `/admin/users/:id` (ADMIN)
 
@@ -53,8 +55,9 @@ Bootstrap do ADMIN (dev) vem no `docker-compose.yml`:
 - GET  `/api/assets`
 - POST `/api/assets/upload`
 
-## Próximos passos
-1) Implementar redirecionamento por permissão para o módulo correto
-2) Melhorar Dashboard MVP para começar o grid 2D (canvas/drag/drop)
-3) Modelar "mapa ativo" e "avatares no mapa" (posição/escala/camadas)
-4) Websocket (tempo real) para sincronizar o tabuleiro
+## Próximos passos (evolução sugerida)
+1) Painel PDV com fluxo completo de venda (itens, estoque, descontos e formas de pagamento).
+2) Dashboard RPG com canvas 2D, camadas e ferramentas de mestre.
+3) Chat com histórico persistente, canais e moderação.
+4) Relatórios administrativos (vendas, uso por módulo, auditoria).
+5) Observabilidade (logs estruturados, alertas e métricas).
