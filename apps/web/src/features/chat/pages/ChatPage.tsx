@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { getAccessToken } from "@/shared/api/http";
+import { getAccessToken, getWsBaseUrl } from "@/shared/api/http";
 import { useTheme } from "@/shared/ui/useTheme";
 import { useAiSignature } from "@/shared/ui/useAiSignature";
 
@@ -23,7 +23,7 @@ export function ChatPage() {
   useEffect(() => {
     const token = getAccessToken();
     if (!token || wsRef.current) return;
-    const wsUrl = `${window.location.origin.replace("http", "ws")}/api/ws/chat?token=${token}`;
+    const wsUrl = `${getWsBaseUrl()}/ws/chat?token=${token}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 

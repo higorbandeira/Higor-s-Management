@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { getAccessToken, http } from "@/shared/api/http";
+import { getAccessToken, getWsBaseUrl, http } from "@/shared/api/http";
 import { useTheme } from "@/shared/ui/useTheme";
 import { useAiSignature } from "@/shared/ui/useAiSignature";
 
@@ -77,7 +77,7 @@ export function DashboardPage() {
     if (!me || wsRef.current) return;
     const token = getAccessToken();
     if (!token) return;
-    const wsUrl = `${window.location.origin.replace("http", "ws")}/api/ws/board?token=${token}`;
+    const wsUrl = `${getWsBaseUrl()}/ws/board?token=${token}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
