@@ -4,6 +4,18 @@ let accessToken: string | null = null;
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
 
+export function getApiBaseUrl() {
+  return import.meta.env.VITE_API_BASE_URL ?? "/api";
+}
+
+export function getWsBaseUrl() {
+  const apiBase = getApiBaseUrl();
+  if (apiBase.startsWith("http://") || apiBase.startsWith("https://")) {
+    return apiBase.replace(/^http/, "ws");
+  }
+  return `${window.location.origin.replace(/^http/, "ws")}${apiBase}`;
+}
+
 export function setAccessToken(token: string | null) {
   accessToken = token;
 }
@@ -13,7 +25,7 @@ export function getAccessToken() {
 }
 
 export const http: AxiosInstance = axios.create({
-  baseURL: "/api",
+  baseURL: getApiBaseUrl(),
   withCredentials: true,
 });
 
@@ -26,11 +38,7 @@ http.interceptors.request.use((config) => {
 });
 
 async function doRefresh(): Promise<string> {
-  const res = await axios.post(
-    "/api/auth/refresh",
-    {},
-    { withCredentials: true }
-  );
+  const res = await axios.post(`${getApiBaseUrl()}/auth/refresh`, {}, { withCredentials: true });
   return res.data.accessToken as string;
 }
 

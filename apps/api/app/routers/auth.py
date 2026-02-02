@@ -59,7 +59,7 @@ def login(data: LoginIn, response: Response, db: Session = Depends(get_db)):
         value=refresh_raw,
         httponly=True,
         secure=settings.COOKIE_SECURE,
-        samesite="lax",
+        samesite=settings.COOKIE_SAMESITE,
         path="/",
         max_age=int(settings.REFRESH_DAYS * 24 * 3600),
     )

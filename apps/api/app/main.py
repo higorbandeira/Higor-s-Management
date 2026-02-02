@@ -8,14 +8,21 @@ from app.db.session import SessionLocal
 from app.routers import auth_router, admin_users_router, assets_router, board_ws_router, chat_ws_router
 
 
+def _parse_origins(raw: str) -> list[str]:
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="Higor API")
 
     # CORS: in prod we'll usually be same-origin behind nginx.
-    allow_origins = [
-        "http://localhost:5173",  # Vite dev
-        "http://localhost:3000",  # nginx web (optional)
-    ] if settings.ENV == "dev" else []
+    if settings.ENV == "dev":
+        allow_origins = [
+            "http://localhost:5173",  # Vite dev
+            "http://localhost:3000",  # nginx web (optional)
+        ]
+    else:
+        allow_origins = _parse_origins(settings.CORS_ORIGINS) if settings.CORS_ORIGINS else []
 
     app.add_middleware(
         CORSMiddleware,

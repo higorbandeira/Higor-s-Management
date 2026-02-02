@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     REFRESH_DAYS: int = 30
 
     COOKIE_SECURE: bool = False
+    COOKIE_SAMESITE: str = "lax"
+
+    # CORS
+    CORS_ORIGINS: str | None = None
 
     BOOTSTRAP_ADMIN_ENABLED: bool = True
     BOOTSTRAP_ADMIN_NICKNAME: str | None = None
