@@ -10,13 +10,8 @@ import { ChatPage } from "@/features/chat/pages/ChatPage";
 import { PdvPage } from "@/features/pdv/pages/PdvPage";
 import { UsersListPage } from "@/features/admin/pages/UsersListPage";
 import { UserEditPage } from "@/features/admin/pages/UserEditPage";
-
-function moduleToRoute(module?: "CHAT" | "DASHBOARD" | "PDV" | "FINANCEIRO") {
-  if (module === "DASHBOARD") return "/dashboard";
-  if (module === "PDV") return "/pdv";
-  if (module === "FINANCEIRO") return "/financeiro";
-  return "/chat";
-}
+import { DoomPage } from "@/features/doom/pages/DoomPage";
+import { moduleToRoute } from "@/shared/constants/modules";
 
 function RootRedirect() {
   const { me, loading } = useAuth();
@@ -38,7 +33,7 @@ export function AppRouter() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute allow={["USER"]}>
+          <ProtectedRoute allow={["USER"]} module="DASHBOARD">
             <DashboardPage />
           </ProtectedRoute>
         }
@@ -46,7 +41,7 @@ export function AppRouter() {
       <Route
         path="/chat"
         element={
-          <ProtectedRoute allow={["USER"]}>
+          <ProtectedRoute allow={["USER"]} module="CHAT">
             <ChatPage />
           </ProtectedRoute>
         }
@@ -54,7 +49,7 @@ export function AppRouter() {
       <Route
         path="/pdv"
         element={
-          <ProtectedRoute allow={["USER"]}>
+          <ProtectedRoute allow={["USER"]} module="PDV">
             <PdvPage />
           </ProtectedRoute>
         }
@@ -63,7 +58,7 @@ export function AppRouter() {
       <Route
         path="/financeiro"
         element={
-          <ProtectedRoute allow={["USER"]}>
+          <ProtectedRoute allow={["USER"]} module="FINANCEIRO">
             <FinanceiroDashboardPage />
           </ProtectedRoute>
         }
@@ -71,8 +66,16 @@ export function AppRouter() {
       <Route
         path="/financeiro/registros"
         element={
-          <ProtectedRoute allow={["USER"]}>
+          <ProtectedRoute allow={["USER"]} module="FINANCEIRO">
             <FinanceiroRegistrosPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doom"
+        element={
+          <ProtectedRoute allow={["USER"]} module="DOOM">
+            <DoomPage />
           </ProtectedRoute>
         }
       />
