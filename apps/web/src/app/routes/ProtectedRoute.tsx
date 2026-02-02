@@ -1,9 +1,10 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
 
-function moduleToRoute(module?: "CHAT" | "DASHBOARD" | "PDV") {
+function moduleToRoute(module?: "CHAT" | "DASHBOARD" | "PDV" | "FINANCEIRO") {
   if (module === "DASHBOARD") return "/dashboard";
   if (module === "PDV") return "/pdv";
+  if (module === "FINANCEIRO") return "/financeiro";
   return "/chat";
 }
 
