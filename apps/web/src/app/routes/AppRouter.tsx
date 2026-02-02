@@ -4,14 +4,17 @@ import { useAuth } from "@/app/providers/AuthProvider";
 
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
+import { FinanceiroDashboardPage } from "@/features/financeiro/pages/FinanceiroDashboardPage";
+import { FinanceiroRegistrosPage } from "@/features/financeiro/pages/FinanceiroRegistrosPage";
 import { ChatPage } from "@/features/chat/pages/ChatPage";
 import { PdvPage } from "@/features/pdv/pages/PdvPage";
 import { UsersListPage } from "@/features/admin/pages/UsersListPage";
 import { UserEditPage } from "@/features/admin/pages/UserEditPage";
 
-function moduleToRoute(module?: "CHAT" | "DASHBOARD" | "PDV") {
+function moduleToRoute(module?: "CHAT" | "DASHBOARD" | "PDV" | "FINANCEIRO") {
   if (module === "DASHBOARD") return "/dashboard";
   if (module === "PDV") return "/pdv";
+  if (module === "FINANCEIRO") return "/financeiro";
   return "/chat";
 }
 
@@ -53,6 +56,23 @@ export function AppRouter() {
         element={
           <ProtectedRoute allow={["USER"]}>
             <PdvPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/financeiro"
+        element={
+          <ProtectedRoute allow={["USER"]}>
+            <FinanceiroDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/financeiro/registros"
+        element={
+          <ProtectedRoute allow={["USER"]}>
+            <FinanceiroRegistrosPage />
           </ProtectedRoute>
         }
       />
