@@ -7,6 +7,7 @@ import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { FinanceiroDashboardPage } from "@/features/financeiro/pages/FinanceiroDashboardPage";
 import { FinanceiroRegistrosPage } from "@/features/financeiro/pages/FinanceiroRegistrosPage";
 import { ChatPage } from "@/features/chat/pages/ChatPage";
+import { AiChatPage } from "@/features/ai-chat/pages/AiChatPage";
 import { PdvPage } from "@/features/pdv/pages/PdvPage";
 import { UsersListPage } from "@/features/admin/pages/UsersListPage";
 import { UserEditPage } from "@/features/admin/pages/UserEditPage";
@@ -43,6 +44,14 @@ export function AppRouter() {
         element={
           <ProtectedRoute allow={["USER"]} module="CHAT">
             <ChatPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-chat"
+        element={
+          <ProtectedRoute allow={["USER"]} module="AI_CHAT">
+            <AiChatPage />
           </ProtectedRoute>
         }
       />

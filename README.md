@@ -5,8 +5,8 @@ Este repositório concentra múltiplos módulos com **login único**, permissõe
 
 ## Módulos atuais
 ### Apps
-- **apps/web**: Interface principal (SPA) com Chat, Dashboard RPG, PDV e Admin.
-- **apps/api**: API FastAPI com autenticação, administração, uploads e WebSockets.
+- **apps/web**: Interface principal (SPA) com Chat, AI CHAT, Dashboard RPG, PDV e Admin.
+- **apps/api**: API FastAPI com autenticação, administração, uploads, WebSockets e integração LLM.
 
 ### Infra
 - **docker-compose.yml**: ambiente local completo (web + api + postgres).
@@ -20,7 +20,7 @@ Este repositório concentra múltiplos módulos com **login único**, permissõe
 - `nickname_norm` para unicidade (trim + collapse espaços + lowercase).
 
 ### Navegação e permissão
-- Redirecionamento automático para o módulo do usuário (CHAT, DASHBOARD ou PDV).
+- Redirecionamento automático para o módulo do usuário (CHAT, AI_CHAT, DASHBOARD ou PDV).
 - Controle de acesso para rotas administrativas.
 
 ### Administração (Admin)
@@ -33,6 +33,9 @@ Este repositório concentra múltiplos módulos com **login único**, permissõe
 ### Chat (Geral)
 - Chat em tempo real via WebSocket.
 
+### AI CHAT
+- Módulo dedicado com LLM rodando no mesmo servidor (local via Ollama ou API), status de execução e respostas imediatas.
+
 ### Dashboard RPG (Campo)
 - Upload de assets (MAP/AVATAR).
 - Tabuleiro com mapas, avatares e ajustes básicos de posição.
@@ -43,6 +46,7 @@ Este repositório concentra múltiplos módulos com **login único**, permissõe
 ## Documentação por módulo
 A documentação geral e os direcionadores de IA ficam no módulo principal:
 - `apps/web/docs/`
+  - `apps/web/docs/ai_chat.md` (AI CHAT + integração LLM)
 
 ## Rodar local (Docker)
 ```bash
@@ -77,6 +81,14 @@ Crie um **Web Service** apontando para este repositório com o diretório `apps/
 - `BOOTSTRAP_ADMIN_ENABLED=true`
 - `BOOTSTRAP_ADMIN_NICKNAME=Admin Master`
 - `BOOTSTRAP_ADMIN_PASSWORD=<senha_forte>`
+- `LLM_API_KEY=<sua_chave_api>`
+- `LLM_MODEL=gpt-5`
+- `LLM_BASE_URL=https://api.openai.com/v1`
+- `LLM_TIMEOUT_SECONDS=30`
+- `LLM_PROVIDER=openai`
+
+> Para LLM local, use `LLM_PROVIDER=ollama`, ajuste `LLM_BASE_URL` para `http://ollama:11434`
+> e `LLM_MODEL` para o modelo local (ex.: `llama3.1`).
 
 > Observação: `COOKIE_SAMESITE=none` exige HTTPS, por isso `COOKIE_SECURE=true`.
 
@@ -93,6 +105,7 @@ Crie outro **Web Service** apontando para o diretório `apps/web`.
 ## Rotas
 - `/login`
 - `/chat` (USER)
+- `/ai-chat` (USER)
 - `/dashboard` (USER)
 - `/pdv` (USER)
 - `/admin/users` (ADMIN)
@@ -109,6 +122,8 @@ Crie outro **Web Service** apontando para o diretório `apps/web`.
 - PATCH `/api/admin/users/{id}`
 - GET  `/api/assets`
 - POST `/api/assets/upload`
+- WS  `/api/ws/chat`
+- WS  `/api/ws/ai-chat`
 
 ## Próximos passos (evolução sugerida)
 1) Painel PDV com fluxo completo de venda (itens, estoque, descontos e formas de pagamento).
