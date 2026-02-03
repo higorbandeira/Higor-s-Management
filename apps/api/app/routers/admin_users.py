@@ -10,7 +10,7 @@ from app.db.models.user import User
 from app.schemas.user import UsersListOut, UserOut, UserCreateIn, UserPatchIn
 
 router = APIRouter(prefix="/admin/users", tags=["admin-users"])
-MODULE_OPTIONS = {"CHAT", "DASHBOARD", "PDV", "FINANCEIRO"}
+MODULE_OPTIONS = {"CHAT", "DASHBOARD", "PDV", "FINANCEIRO", "DOOM"}
 
 
 @router.get("", response_model=UsersListOut)

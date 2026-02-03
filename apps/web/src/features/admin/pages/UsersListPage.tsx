@@ -4,12 +4,13 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import { http } from "@/shared/api/http";
 import { useTheme } from "@/shared/ui/useTheme";
 import { useAiSignature } from "@/shared/ui/useAiSignature";
+import { MODULE_OPTIONS, type ModuleKey } from "@/shared/constants/modules";
 
 type User = {
   id: string;
   nickname: string;
   role: "USER" | "ADMIN";
-  module: "CHAT" | "DASHBOARD" | "PDV" | "FINANCEIRO";
+  module: ModuleKey;
   isActive: boolean;
 };
 
@@ -20,15 +21,16 @@ export function UsersListPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
-  const [module, setModule] = useState<"CHAT" | "DASHBOARD" | "PDV" | "FINANCEIRO">("CHAT");
+  const [module, setModule] = useState<ModuleKey>("CHAT");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const moduleLabels: Record<User["module"], string> = {
-    CHAT: "Chat geral",
-    DASHBOARD: "Campo RPG",
-    PDV: "PDV",
-    FINANCEIRO: "Financeiro",
-  };
+  const moduleLabels = MODULE_OPTIONS.reduce<Record<ModuleKey, string>>(
+    (acc, option) => {
+      acc[option.value] = option.label;
+      return acc;
+    },
+    {} as Record<ModuleKey, string>
+  );
 
   async function load() {
     const res = await http.get("/admin/users");
@@ -191,13 +193,14 @@ export function UsersListPage() {
                 <label style={labelStyle}>Módulo</label>
                 <select
                   value={module}
-                  onChange={(e) => setModule(e.target.value as "CHAT" | "DASHBOARD" | "PDV" | "FINANCEIRO")}
+                  onChange={(e) => setModule(e.target.value as ModuleKey)}
                   style={inputStyle}
                 >
-                  <option value="CHAT">Chat geral</option>
-                  <option value="DASHBOARD">Campo RPG</option>
-                  <option value="PDV">PDV</option>
-                  <option value="FINANCEIRO">Financeiro</option>
+                  {MODULE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -261,7 +264,7 @@ export function UsersListPage() {
                 }}
               >
                 <div style={{ flex: "1 1 200px", minWidth: 160 }}>{u.nickname}</div>
-                <div style={{ flex: "1 1 140px", minWidth: 120 }}>{moduleLabels[u.module]}</div>
+                <div style={{ flex: "1 1 140px", minWidth: 120 }}>{moduleLabels[u.module] ?? u.module}</div>
                 <div
                   style={{
                     flex: "1 1 120px",

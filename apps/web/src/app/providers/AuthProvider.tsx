@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { http, setAccessToken } from "@/shared/api/http";
+import type { ModuleKey } from "@/shared/constants/modules";
 
 type Me = {
   id: string;
   nickname: string;
   role: "USER" | "ADMIN";
-  module: "CHAT" | "DASHBOARD" | "PDV" | "FINANCEIRO";
+  module: ModuleKey;
 };
 
 type AuthCtx = {

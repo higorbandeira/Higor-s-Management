@@ -1,18 +1,14 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/app/providers/AuthProvider";
-
-function moduleToRoute(module?: "CHAT" | "DASHBOARD" | "PDV" | "FINANCEIRO") {
-  if (module === "DASHBOARD") return "/dashboard";
-  if (module === "PDV") return "/pdv";
-  if (module === "FINANCEIRO") return "/financeiro";
-  return "/chat";
-}
+import { moduleToRoute, type ModuleKey } from "@/shared/constants/modules";
 
 export function ProtectedRoute({
   allow,
+  module,
   children,
 }: {
   allow: Array<"USER" | "ADMIN">;
+  module?: ModuleKey;
   children: React.ReactNode;
 }) {
   const { me, loading } = useAuth();
@@ -26,6 +22,10 @@ export function ProtectedRoute({
     ) : (
       <Navigate to={moduleToRoute(me.module)} replace />
     );
+  }
+
+  if (module && me.role === "USER" && me.module !== module) {
+    return <Navigate to={moduleToRoute(me.module)} replace />;
   }
 
   return <>{children}</>;
