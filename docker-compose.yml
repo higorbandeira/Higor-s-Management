@@ -23,6 +23,11 @@ services:
       BOOTSTRAP_ADMIN_ENABLED: "true"
       BOOTSTRAP_ADMIN_NICKNAME: "Admin Master"
       BOOTSTRAP_ADMIN_PASSWORD: "admin123"
+      LLM_PROVIDER: "ollama"
+      LLM_API_KEY: ""
+      LLM_MODEL: "llama3.1"
+      LLM_BASE_URL: "http://ollama:11434"
+      LLM_TIMEOUT_SECONDS: 30
     depends_on:
       - db
     volumes:
@@ -39,5 +44,14 @@ services:
     ports:
       - "3000:80"
 
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+
+
 volumes:
   pgdata:
+  ollama:

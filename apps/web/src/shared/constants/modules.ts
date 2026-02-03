@@ -1,5 +1,6 @@
 export const MODULE_OPTIONS = [
   { value: "CHAT", label: "Chat geral", route: "/chat" },
+  { value: "AI_CHAT", label: "AI CHAT", route: "/ai-chat" },
   { value: "DASHBOARD", label: "Campo RPG", route: "/dashboard" },
   { value: "PDV", label: "PDV", route: "/pdv" },
   { value: "FINANCEIRO", label: "Financeiro", route: "/financeiro" },
