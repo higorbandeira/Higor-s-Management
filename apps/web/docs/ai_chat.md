@@ -49,8 +49,9 @@ O novo módulo aparece no cadastro e edição de usuários com o rótulo **AI CH
 ### Status do processo
 O cabeçalho do módulo mostra o status enviado pelo servidor:
 
-- **Processo rodando**: LLM em execução.
-- **Processo parado**: sem processamento ativo.
+- **IA online**: LLM disponível para respostas.
+- **Processando**: LLM em execução.
+- **IA offline**: LLM indisponível ou não configurada.
 
 ## QA e UX
 Para testes iniciais:
@@ -62,4 +63,4 @@ Para testes iniciais:
 
 Valide:
 - A resposta limitada para assuntos fora do escopo.
-- O status muda para **rodando** durante a resposta e volta para **parado**.
+- O status muda para **Processando** durante a resposta e volta para **IA online**.

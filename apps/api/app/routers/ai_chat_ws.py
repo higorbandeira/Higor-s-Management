@@ -74,8 +74,7 @@ async def ai_chat_ws(websocket: WebSocket) -> None:
     await websocket.accept()
     connections.add(websocket)
     await websocket.send_json({"type": "state", "messages": ai_chat_state})
-    await websocket.send_json({"type": "status", "state": "idle"})
-
+    await websocket.send_json({"type": "status", "state": "online"})
     try:
         while True:
             message = await websocket.receive_json()
@@ -88,19 +87,25 @@ async def ai_chat_ws(websocket: WebSocket) -> None:
                 continue
 
             await _push_message(sender, text, "USER")
-            await _broadcast({"type": "status", "state": "running"})
+            await _broadcast({"type": "status", "state": "processing"})
 
             limited_reply = "Este é um chat limitado e não posso falar sobre esse assunto."
+            reply_text: str
+            status_after = "online"
             if not _is_allowed_message(text):
                 reply_text = limited_reply
+            elif settings.LLM_PROVIDER != "ollama" and not settings.LLM_API_KEY:
+                reply_text = "LLM não configurada no servidor."
+                status_after = "offline"
             else:
                 try:
                     tagged_text = f"[AI_CHAT] {text.strip()}"
                     reply_text = await generate_ai_reply(tagged_text)
                 except LlmError:
                     reply_text = "Não foi possível responder agora. Tente novamente em instantes."
+                    status_after = "offline"
 
             await _push_message("AI CHAT", reply_text, "AI")
-            await _broadcast({"type": "status", "state": "idle"})
+            await _broadcast({"type": "status", "state": status_after})
     except WebSocketDisconnect:
         connections.discard(websocket)

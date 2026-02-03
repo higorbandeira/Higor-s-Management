@@ -12,7 +12,7 @@ type ChatMessage = {
   tag?: "USER" | "AI";
 };
 
-type StatusState = "running" | "idle";
+type StatusState = "online" | "processing" | "offline";
 
 export function AiChatPage() {
   const { me, logout } = useAuth();
@@ -21,7 +21,7 @@ export function AiChatPage() {
   const wsRef = useRef<WebSocket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
-  const [status, setStatus] = useState<StatusState>("idle");
+  const [status, setStatus] = useState<StatusState>("offline");
   const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export function AiChatPage() {
           setMessages(payload.messages ?? []);
         }
         if (payload?.type === "status") {
-          setStatus(payload.state === "running" ? "running" : "idle");
+          setStatus(payload.state ?? "offline");
         }
       } catch {
         // ignore invalid payloads
@@ -137,8 +137,10 @@ export function AiChatPage() {
   };
 
   const groupedMessages = useMemo(() => messages.slice(-80), [messages]);
-  const statusLabel = status === "running" ? "Processo rodando" : "Processo parado";
-  const statusColor = status === "running" ? "#00c853" : isDark ? "#bdbdbd" : "#616161";
+  const statusLabel =
+    status === "processing" ? "Processando" : status === "online" ? "IA online" : "IA offline";
+  const statusColor =
+    status === "processing" ? "#00c853" : status === "online" ? "#4caf50" : isDark ? "#bdbdbd" : "#616161";
 
   return (
     <div style={pageStyle}>
