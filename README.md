@@ -34,7 +34,7 @@ Este repositório concentra múltiplos módulos com **login único**, permissõe
 - Chat em tempo real via WebSocket.
 
 ### AI CHAT
-- Módulo dedicado com LLM rodando no mesmo servidor, status de execução e respostas imediatas.
+- Módulo dedicado com LLM rodando no mesmo servidor (local via Ollama ou API), status de execução e respostas imediatas.
 
 ### Dashboard RPG (Campo)
 - Upload de assets (MAP/AVATAR).
@@ -85,6 +85,10 @@ Crie um **Web Service** apontando para este repositório com o diretório `apps/
 - `LLM_MODEL=gpt-5`
 - `LLM_BASE_URL=https://api.openai.com/v1`
 - `LLM_TIMEOUT_SECONDS=30`
+- `LLM_PROVIDER=openai`
+
+> Para LLM local, use `LLM_PROVIDER=ollama`, ajuste `LLM_BASE_URL` para `http://ollama:11434`
+> e `LLM_MODEL` para o modelo local (ex.: `llama3.1`).
 
 > Observação: `COOKIE_SAMESITE=none` exige HTTPS, por isso `COOKIE_SECURE=true`.
 

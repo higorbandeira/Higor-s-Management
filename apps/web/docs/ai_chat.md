@@ -15,10 +15,21 @@ Este documento descreve a configuração da LLM no mesmo servidor da API e o mó
 ### Variáveis de ambiente
 Configure no serviço da API:
 
+- `LLM_PROVIDER`: `openai` ou `ollama`.
 - `LLM_API_KEY`: chave da API.
 - `LLM_MODEL`: modelo LLM (padrão `gpt-5`).
 - `LLM_BASE_URL`: base URL (padrão `https://api.openai.com/v1`).
 - `LLM_TIMEOUT_SECONDS`: timeout das chamadas.
+
+#### LLM local (Ollama)
+Para rodar a LLM local, use:
+
+- `LLM_PROVIDER=ollama`
+- `LLM_BASE_URL=http://ollama:11434`
+- `LLM_MODEL=llama3.1` (ou outro modelo disponível)
+
+No Docker local, o serviço `ollama` já está no `docker-compose.yml`. Você pode fazer o pull do
+modelo com: `docker exec -it <container_ollama> ollama pull llama3.1`.
 
 ### Regras de comportamento
 Para manter o chat limitado e seguro, o backend aplica um filtro simples:

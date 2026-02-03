@@ -30,6 +30,28 @@ def _extract_output_text(payload: dict[str, Any]) -> str:
 
 
 async def generate_ai_reply(message: str) -> str:
+    timeout = httpx.Timeout(settings.LLM_TIMEOUT_SECONDS)
+
+    if settings.LLM_PROVIDER == "ollama":
+        url = f"{settings.LLM_BASE_URL.rstrip('/')}/api/chat"
+        payload = {
+            "model": settings.LLM_MODEL,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": message},
+            ],
+            "stream": False,
+        }
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.post(url, json=payload)
+            if response.status_code >= 400:
+                raise LlmError(f"LLM request failed: {response.status_code}")
+            data = response.json()
+            output_text = (data.get("message") or {}).get("content", "").strip()
+            if not output_text:
+                raise LlmError("LLM returned empty output.")
+            return output_text
+
     if not settings.LLM_API_KEY:
         return "LLM não configurada no servidor."
 
@@ -43,7 +65,6 @@ async def generate_ai_reply(message: str) -> str:
         ],
         "temperature": 0.2,
     }
-    timeout = httpx.Timeout(settings.LLM_TIMEOUT_SECONDS)
     async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.post(url, json=payload, headers=headers)
         if response.status_code >= 400:

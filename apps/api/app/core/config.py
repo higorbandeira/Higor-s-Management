@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     BOOTSTRAP_ADMIN_PASSWORD: str | None = None
 
     # LLM
+    LLM_PROVIDER: str = "openai"  # openai | ollama
     LLM_API_KEY: str | None = None
     LLM_MODEL: str = "gpt-5"
     LLM_BASE_URL: str = "https://api.openai.com/v1"
