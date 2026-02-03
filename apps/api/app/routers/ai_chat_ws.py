@@ -75,7 +75,6 @@ async def ai_chat_ws(websocket: WebSocket) -> None:
     connections.add(websocket)
     await websocket.send_json({"type": "state", "messages": ai_chat_state})
     await websocket.send_json({"type": "status", "state": "online"})
-
     try:
         while True:
             message = await websocket.receive_json()
