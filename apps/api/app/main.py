@@ -5,7 +5,14 @@ from fastapi.staticfiles import StaticFiles
 from app.core.bootstrap import bootstrap_admin, BootstrapError
 from app.core.config import settings
 from app.db.session import SessionLocal
-from app.routers import auth_router, admin_users_router, assets_router, board_ws_router, chat_ws_router
+from app.routers import (
+    auth_router,
+    admin_users_router,
+    assets_router,
+    board_ws_router,
+    chat_ws_router,
+    ai_chat_ws_router,
+)
 
 
 def _parse_origins(raw: str) -> list[str]:
@@ -38,6 +45,7 @@ def create_app() -> FastAPI:
     app.include_router(assets_router, prefix="/api")
     app.include_router(board_ws_router, prefix="/api")
     app.include_router(chat_ws_router, prefix="/api")
+    app.include_router(ai_chat_ws_router, prefix="/api")
 
     # Serve local uploads
     app.mount("/storage", StaticFiles(directory="storage"), name="storage")

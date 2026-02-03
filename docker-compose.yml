@@ -23,6 +23,10 @@ services:
       BOOTSTRAP_ADMIN_ENABLED: "true"
       BOOTSTRAP_ADMIN_NICKNAME: "Admin Master"
       BOOTSTRAP_ADMIN_PASSWORD: "admin123"
+      LLM_API_KEY: ""
+      LLM_MODEL: "gpt-5"
+      LLM_BASE_URL: "https://api.openai.com/v1"
+      LLM_TIMEOUT_SECONDS: 30
     depends_on:
       - db
     volumes:
